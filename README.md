@@ -1,4 +1,4 @@
-Zoobot
+Zoobot (Or whatever we decide to call it)
 ======
 Team (need to find a teamname)'s bot for The Gathering 2014 AI Programming compo   
 
