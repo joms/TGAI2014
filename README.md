@@ -8,9 +8,9 @@ Will probably be written in js and run in browser. This makes it able to run ext
 
 Debugging:
 - Status-display
-- Minimap
-⋅⋅- Path
-⋅⋅- ⋅Other players
-⋅⋅- ⋅Powerups
+- Map
+ - Path
+ - Other Players
+ - Powerups
 - Actionlog
 - Ability to pause bot(?)
