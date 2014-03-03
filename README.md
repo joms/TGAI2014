@@ -6,6 +6,8 @@ Will probably be written in js and run in browser. This makes it able to run ext
 
 ---
 
+We can use EmberJS to connect to a template and update it in real time.   
+
 Debugging:
 - Status-display
 - Map
