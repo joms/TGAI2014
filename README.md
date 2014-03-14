@@ -23,4 +23,4 @@ Debugging:
 
 1. Handle bombs diagonally
 2. Do not kill real humans
-3. I DON'T KNOW!!!
+3. Random like a boss?
