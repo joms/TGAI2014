@@ -16,3 +16,11 @@ Debugging:
  - Powerups
 - Actionlog
 - Ability to pause bot(?)
+
+---
+
+*Behaviour*
+
+1. Handle bombs diagonally
+2. Do not kill real humans
+3. 
