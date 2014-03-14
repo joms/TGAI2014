@@ -1,4 +1,4 @@
-Zoobot (Or whatever we decide to call it)
+The Gathering Artificial Intelligence 2014
 ======
 ####Team (need to find a teamname)'s bot for The Gathering 2014 AI Programming compo   
 
