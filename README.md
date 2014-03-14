@@ -19,7 +19,7 @@ Debugging:
 
 ---
 
-*Behaviour*
+####Behaviour
 
 1. Handle bombs diagonally
 2. Do not kill real humans
