@@ -1,11 +1,11 @@
 var net = require('net');
 require('./astar.js');
+var p = require('./parser.js');
 var Navigator = require('./navigation.js');
-
 var HOST = '127.0.0.1';
 var PORT = 54321;
-
 var client = new net.Socket();
+
 client.connect(PORT, HOST, function() {
     console.log('CONNECTED TO: ' + HOST + ':' + PORT);
     client.write('martinerkul');
@@ -18,12 +18,21 @@ client.on('error', function(data) {
 
 client.on('data', function(data) {
     console.log('DATA: ' + data);
+	var created = true 
+	var mapblob = p.parser(data, created)
+	randommove()
 });
 
 client.on('close', function() {
     console.log('Connection closed');
     client.destroy();
 });
+
+function randommove() {
+	var ran = Math.floor((Math.random()*5));
+	var move = ["UP","DOWN","LEFT","RIGHT","BOMB"]
+	client.write(move[ran])
+}
 
 var dummymap = [
     [0,0,0,0,0,0,0,0],
