@@ -1,5 +1,3 @@
-
-
 module.exports = navigator;
 
 function navigator(path, map)
