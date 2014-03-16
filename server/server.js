@@ -27,22 +27,22 @@ client.on('close', function() {
 
 var dummymap = [
     [0,0,0,0,0,0,0,0],
-    [0,2,2,2,1,1,1,0],
-    [0,2,0,2,1,1,1,0],
-    [0,1,0,1,1,1,1,0],
-    [0,1,0,1,1,1,1,0],
+    [0,2,2,1,1,1,1,0],
+    [0,2,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,0],
     [0,1,1,1,1,1,2,0],
     [0,1,1,1,1,2,2,0],
     [0,0,0,0,0,0,0,0]
 ];
 
 var graph = new Graph(dummymap);
-var start = graph.nodes[2][1];
-var end  = graph.nodes[2][3];
+var start = graph.nodes[1][1];
+var end  = graph.nodes[6][6];
 var result = astar.search(graph.nodes, start, end);
 
 var n = new Navigator(result, dummymap);
-n.update(2, 1, "X");
+n.update(start.x, start.y, "X");
 
 for (var i = 0; i < result.length; i++)
 {

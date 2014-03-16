@@ -1,3 +1,5 @@
+
+
 module.exports = navigator;
 
 function navigator(path, map)
@@ -5,39 +7,39 @@ function navigator(path, map)
     this.path = path;
     this.map = map;
     this.moves = [
-        "LEFT\n",
         "RIGHT\n",
-        "UP\n",
-        "DOWN\n"
+        "LEFT\n",
+        "DOWN\n",
+        "UP\n"
     ];
 }
 
 navigator.prototype.move = function(num)
 {
     var p = this.path[num];
-
+    console.log (num)
     console.log("X  Y");
-    console.log(p.parent.x +", "+p.parent.y);
-    console.log(p.x +", "+p.y);
+    console.log(p.parent.y +", "+p.parent.x); // Seems like x and y needs på be flipped ... yes, it hurts
+    console.log(p.y +", "+p.x);
 
-   var m;
+    var m;
 
-    if (p.x == p.parent.x)
+    if (p.y == p.parent.y)
     {
         console.log("Vertical move");
-        if (p.y - 1 == p.parent.y) // Vertical move
+        if (p.x - 1 == p.parent.x) // Vertical move
         {
-            m = 2; // UP
+            m = 2; // Down
         } else {
-            m = 3; // DOWN
+            m = 3; // Up
         }
     } else {
         console.log("Horizontal move");
-        if (p.x - 1 == p.parent.x) // Horizontal move
+        if (p.y - 1 == p.parent.y) // Horizontal move
         {
-            m = 0; // LEFT
+            m = 0; // right
         } else {
-            m = 1; // RIGHT
+            m = 1; // left
         }
     }
 
@@ -49,3 +51,4 @@ navigator.prototype.update = function(x, y, i)
 {
     this.map[x][y] = i;
 }
+
