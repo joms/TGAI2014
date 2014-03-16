@@ -1,5 +1,6 @@
 var net = require('net');
 require('./astar.js');
+var Navigator = require('./navigation.js');
 
 var HOST = '127.0.0.1';
 var PORT = 54321;
@@ -26,18 +27,26 @@ client.on('close', function() {
 
 var dummymap = [
     [0,0,0,0,0,0,0,0],
-    [0,2,2,1,1,1,1,0],
-    [0,2,1,1,1,1,1,0],
-    [0,1,1,1,1,1,1,0],
-    [0,1,1,1,1,1,1,0],
+    [0,2,2,2,1,1,1,0],
+    [0,2,0,2,1,1,1,0],
+    [0,1,0,1,1,1,1,0],
+    [0,1,0,1,1,1,1,0],
     [0,1,1,1,1,1,2,0],
     [0,1,1,1,1,2,2,0],
     [0,0,0,0,0,0,0,0]
 ];
 
 var graph = new Graph(dummymap);
-var start = graph.nodes[1][1];
-var end  = graph.nodes[1][2];
+var start = graph.nodes[2][1];
+var end  = graph.nodes[2][3];
 var result = astar.search(graph.nodes, start, end);
 
-console.log(result);
+var n = new Navigator(result, dummymap);
+n.update(2, 1, "X");
+
+for (var i = 0; i < result.length; i++)
+{
+    console.log(n.move(i));
+}
+
+console.log(n.map);
