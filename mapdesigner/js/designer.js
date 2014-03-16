@@ -1,8 +1,9 @@
 /**
- * 0 = ~
- * 1 = boat
- * 2 = splash
- * 3 = BHAM
+ * 0 = Undestroyable wall
+ * 1 = Destroyable wall
+ * 2 = Grass
+ *
+ * X = Player start
  */
 
 function MapDesigner(canvas)
@@ -10,19 +11,18 @@ function MapDesigner(canvas)
     var canvas = canvas;
     var ctx = canvas.getContext('2d');
 
-    var Map =  [[0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0]];
+    var Map = [
+        [0,0,0,0,0,0,0,0],
+        [0,'X',2,1,1,1,1,0],
+        [0,2,1,1,1,1,1,0],
+        [0,1,1,1,1,1,1,0],
+        [0,1,1,1,1,1,1,0],
+        [0,1,1,1,1,1,2,0],
+        [0,1,1,1,1,2,'X',0],
+        [0,0,0,0,0,0,0,0]
+    ];
 
-    var ships = {2: [], 3: [], 4: [], 5: []};
-    var shipTypes = {2: 4, 3: 3, 4: 2, 5: 1};
+    var tiles = [0, 1, 2, 'X'];
 
     var clickStart = {mouse: [0,0], tile: [0,0]};
     var mouseIsDown = false;
@@ -56,20 +56,20 @@ function MapDesigner(canvas)
                 }
                 else if (Map[i][j] == 2)
                 {
-                    ctx.fillStyle = '#666';
+                    ctx.fillStyle = '#696';
+                    ctx.fillRect(j * w + (j * spacing), i * h + (i * spacing), w, h);
+                }
+                else if (Map[i][j] == 'X')
+                {
+                    ctx.fillStyle = '#696';
                     ctx.fillRect(j * w + (j * spacing), i * h + (i * spacing), w, h);
                     ctx.fillStyle = '#33B5E5';
                     ctx.fillRect(j * w + (j * spacing) + offset1, i * h + (i * spacing) + offset1, w - offset2, h - offset2);
                 }
-                else if (Map[i][j] == 3)
-                {
-                    ctx.fillStyle = '#CCC';
-                    ctx.fillRect(j * w + (j * spacing), i * h + (i * spacing), w, h);
-                    ctx.fillStyle = '#FF4444';
-                    ctx.fillRect(j * w + (j * spacing) + offset1, i * h + (i * spacing) + offset1, w - offset2, h - offset2);
-                }
             }
         }
+
+        $('#map').text(JSON.stringify(Map));
     }
 
     function mouseDownHandler(e)
@@ -152,60 +152,42 @@ function MapDesigner(canvas)
     }
 
     /**
-     * Removes ship at given coordinate when user doubleclicks
+     * Scrolls through the tiles-array and sets the tile to the next component
+     * @param e
+     */
+    function mouseClickHandler(e)
+    {
+        var clickedTile = FindTile(e.clientX, e.clientY);
+        switch(Map[clickedTile.y][clickedTile.x])
+        {
+            case 0:
+                Map[clickedTile.y][clickedTile.x] = 1;
+                break;
+            case 1:
+                Map[clickedTile.y][clickedTile.x] = 2;
+                break;
+            case 2:
+                Map[clickedTile.y][clickedTile.x] = 'X';
+                break;
+            default:
+                Map[clickedTile.y][clickedTile.x] = 0;
+        }
+
+        Draw();
+    }
+
+    /**
+     * Removes resets tile to wall
      * @param e
      */
     function mouseDoubleClickHandler(e)
     {
         var clickedTile = FindTile(e.clientX, e.clientY);
-        if (Map[clickedTile.y][clickedTile.x] === 1)
+        if (Map[clickedTile.y][clickedTile.x] !== 0)
         {
-            for (var i = 2; i <= 5; i++)
-            {
-                for (var j = 0; j < ships[i].length; j++){
-                    for (var k = 0; k < ships[i][j].length; k++)
-                    {
-                        if (ships[i][j][k][0] === clickedTile.x && ships[i][j][k][1] === clickedTile.y)
-                        {
-                            CircleTiles(ships[i][j], true);
-                            ships[i].splice(j, 1);
-                            Draw();
-                            return;
-                        }
-                    }
-                }
-            }
+            Map[clickedTile.y][clickedTile.x] = 0;
+            Draw();
         }
-    }
-
-    /**
-     * Checks if ship given in array intersects with another ship, if not it's added to map
-     * @param input Ship in form of an array
-     * @param del Boolean representing whether it's a delete or not
-     * @returns {boolean}
-     */
-    function CircleTiles(input, del)
-    {
-        // Check if ship intersects another ship
-        if (del == false)
-        {
-            for (var i = 0; i < input.length; i++)
-            {
-                var x = input[i];
-                if (Map[x[1]][x[0]] == 1)
-                    return;
-            }
-        }
-
-        // Add ship to map
-        for (var i = 0; i < input.length; i++)
-        {
-            var x = input[i]
-            var type = (Map[x[1]][x[0]] + 1) % 2;
-            Map[x[1]][x[0]] = type;
-        }
-
-        return true;
     }
 
     /**
@@ -226,50 +208,26 @@ function MapDesigner(canvas)
         return {x: squareX, y: squareY};
     }
 
-    function ClearMap()
+    this.ClearMap = function()
     {
-        Map = [[0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0]];
-        ships = {2: [], 3: [], 4: [], 5: []};
+        Map = [
+            [0,0,0,0,0,0,0,0],
+            [0,'X',2,1,1,1,1,0],
+            [0,2,1,1,1,1,1,0],
+            [0,1,1,1,1,1,1,0],
+            [0,1,1,1,1,1,1,0],
+            [0,1,1,1,1,1,2,0],
+            [0,1,1,1,1,2,'X',0],
+            [0,0,0,0,0,0,0,0]
+        ];
         Draw();
-    }
-
-    /**
-     * Checks if all is good before sending the map away to server
-     * This should be checked on the serverside too
-     */
-    this.Submit = function()
-    {
-        /**
-         * Commented for debugging
-         for (var i = 2; i <= 5; i++)
-         {
-             if (ships[i] > shipTypes[i])
-             {
-                 terminal.log(Parser.Parse({type: "ERROR", result: "Too many ships (cheater!)"}));
-                 return false;
-             } else if (ships[i] < shipTypes[i]) {
-                 terminal.log(Parser.Parse({type: "ERROR", result: "Too few ships"}));
-                 return false;
-             }
-         }
-         */
-
-        socket.emit('submit_map', Map);
     }
 
     canvas.onmousedown = function(e) { mouseDownHandler(e); }
     canvas.onmouseup = function(e) { mouseUpHandler(e); }
     canvas.onmousemove = function(e) { mouseMoveHandler(e); }
     canvas.ondblclick = function(e) { mouseDoubleClickHandler(e); }
+    canvas.onclick = function(e) { mouseClickHandler(e); }
 
     Draw();
 }
