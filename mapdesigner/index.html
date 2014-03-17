@@ -23,19 +23,19 @@
                 <div class="form-horizontal form-group">
                     <label for="map_height" class="col-sm-2 control-label">Height </label>
                     <div class="col-sm-10">
-                        <input type="number" class="form-control" id="map_height" placeholder="Doesn't work">
+                        <input type="number" onblur="designer.UpdateSize(this)" class="form-control" id="map_height">
                     </div>
                 </div>
                 <div class="form-horizontal form-group">
                     <label for="map_width" class="col-sm-2 control-label">Width</label>
                     <div class="col-sm-10">
-                        <input type="number" class="form-control" id="map_width" placeholder="Doesn't work">
+                        <input type="number" onblur="designer.UpdateSize(this)" class="form-control" id="map_width">
                     </div>
                 </div>
-                <div class="form-horizontal form-group">
+                <div class="form-horizontal form-group" id="map_input">
                     <label for="map_width" class="col-sm-2 control-label">Map</label>
                     <div class="col-sm-10">
-                        <textarea class="form-control" id="map" ></textarea>
+                        <textarea onblur="designer.Update(this.value);" class="form-control" id="map" ></textarea>
                     </div>
                 </div>
                 <div class="form-horizontal form-group">

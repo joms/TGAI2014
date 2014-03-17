@@ -22,8 +22,6 @@ function MapDesigner(canvas)
         [0,0,0,0,0,0,0,0]
     ];
 
-    var tiles = [0, 1, 2, 'X'];
-
     var clickStart = {mouse: [0,0], tile: [0,0]};
     var mouseIsDown = false;
 
@@ -32,18 +30,21 @@ function MapDesigner(canvas)
         ctx.fillStyle = '#FFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        var tiles = Map.length;
+        var tiles = [Map.length, Map[0].length];
         var spacing = 2;
 
-        var w = canvas.width / tiles - spacing;
-        var h = canvas.height / tiles - spacing;
+        $('#map_width').val(tiles[1]);
+        $('#map_height').val(tiles[0]);
+
+        var w = canvas.width / tiles[1] - spacing;
+        var h = canvas.height / tiles[0] - spacing;
 
         var offset1 = w / 4;
         var offset2 = (h / 4) * 2;
 
         // Handling colors and shapes according to whatever number's returned from map
-        for (var i = 0; i < tiles; i++){
-            for (var  j= 0; j < tiles; j++){
+        for (var i = 0; i < tiles[0]; i++){
+            for (var  j= 0; j < tiles[1]; j++){
                 if (Map[i][j] == 0)
                 {
                     ctx.fillStyle = '#666';
@@ -72,85 +73,6 @@ function MapDesigner(canvas)
         $('#map').text(JSON.stringify(Map));
     }
 
-    function mouseDownHandler(e)
-    {
-        e.preventDefault();
-        mouseIsDown = true;
-        var x = e.clientX;
-        var y = e.clientY;
-
-        var tile = FindTile(x, y);
-
-        clickStart.mouse[0] = x;
-        clickStart.mouse[1] = y;
-        clickStart.tile[0] = tile.x;
-        clickStart.tile[1] = tile.y;
-    }
-
-    function mouseUpHandler(e)
-    {
-        mouseIsDown = false;
-        var x = e.clientX;
-        var y = e.clientY;
-
-        var tile = FindTile(x, y);
-
-        var movedSquaresX = Math.abs(tile.x - clickStart.tile[0]);
-        var movedSquaresY = Math.abs(tile.y - clickStart.tile[1]);
-
-        // There's no ship that huge - nor that small
-        if (movedSquaresX > 4 || movedSquaresY > 4 || (movedSquaresY == 0 && movedSquaresX == 0)) return;
-
-        //find what ship were drawn, and save it to an array
-        var drawnShip = [];
-        if (movedSquaresX > movedSquaresY)
-        {
-            if (clickStart.tile[0] < tile.x)
-            {
-                for (var i = clickStart.tile[0]; i <= tile.x; i++)
-                {
-                    drawnShip.push([i, tile.y]);
-                }
-            } else {
-                for (var i = clickStart.tile[0]; i >= tile.x; i--)
-                {
-                    drawnShip.push([i, tile.y]);
-                }
-            }
-        } else {
-            if (clickStart.tile[1] < tile.y)
-            {
-                for (var i = clickStart.tile[1]; i <= tile.y; i++)
-                {
-                    drawnShip.push([tile.x, i]);
-                }
-            } else {
-                for (var i = clickStart.tile[1]; i >= tile.y; i--)
-                {
-                    drawnShip.push([tile.x, i]);
-                }
-            }
-        }
-
-        // Check whether the ship have been used too many times or it intersects another ship
-        if (ships[drawnShip.length].length < shipTypes[drawnShip.length])
-        {
-            if (!CircleTiles(drawnShip, false)) return;
-            ships[drawnShip.length].push(drawnShip);
-        }
-
-        Draw();
-    }
-
-    /**
-     * Animating the mousemove when adding ships
-     */
-    function mouseMoveHandler(e)
-    {
-        if (!mouseIsDown) return;
-
-    }
-
     /**
      * Scrolls through the tiles-array and sets the tile to the next component
      * @param e
@@ -177,7 +99,7 @@ function MapDesigner(canvas)
     }
 
     /**
-     * Removes resets tile to wall
+     * Resets tile to wall
      * @param e
      */
     function mouseDoubleClickHandler(e)
@@ -203,11 +125,119 @@ function MapDesigner(canvas)
         x -= rect.left;
         y -= rect.top;
 
-        var squareX = Math.floor(x / canvas.width * Map.length);
-        var squareY = Math.floor(y / canvas.height * Map[0].length);
+        var squareX = Math.floor(x / canvas.width * Map[0].length);
+        var squareY = Math.floor(y / canvas.height * Map.length);
+
         return {x: squareX, y: squareY};
     }
 
+    /**
+     * Updates map on trigger from designer
+     * @param map
+     * @constructor
+     */
+    this.Update = function(map)
+    {
+        var newMap;
+        var canUpdate = true;
+
+        try {
+            newMap = JSON.parse(map);
+        } catch (e) {
+            canUpdate = false;
+        }
+
+        var tiles = [0, 1, 2, 'X'];
+
+        if (typeof(newMap) === "object")
+        {
+            newMap.forEach(function(d){
+                d.forEach(function(e){
+                    if ($.inArray(e, tiles) == -1)
+                    {
+                        canUpdate = false;
+                    }
+                });
+            });
+        } else {
+            canUpdate = false;
+        }
+
+        if (canUpdate)
+        {
+            $('#map_input').addClass('has-success');
+            $('#map_input').removeClass('has-error');
+            Map = newMap;
+            Draw();
+        } else {
+            $('#map_input').removeClass('has-success');
+            $('#map_input').addClass('has-error');
+        }
+
+    }
+
+    /**
+     * Updates size of the map
+     * @param e
+     * @constructor
+     */
+    this.UpdateSize = function(e)
+    {
+        if (e.id === "map_height")
+        {
+            if (e.value > Map.length)
+            {
+                var ml = e.value - Map.length;
+                for (var i = 0; i < ml; i++)
+                {
+                    var l = parseInt($('#map_width').val());
+                    var arr = Array(l+1).join('0').split('').map(parseFloat)
+                    Map.push(arr);
+                }
+            }
+
+            if (e.value < Map.length)
+            {
+                var n = Map.length - e.value;
+                for (var i = 0; i < n; i++)
+                {
+                    Map.pop();
+                }
+            }
+        }
+
+        if (e.id === "map_width")
+        {
+            if (e.value > Map[0].length)
+            {
+                var n = e.value - Map[0].length;
+                console.log(n);
+                for (var i = 0; i < n; i++)
+                {
+                    $.each(Map, function(i, v){
+                        v.push(0);
+                    });
+                }
+            }
+
+            if (e.value < Map[0].length)
+            {
+                var n = Map[0].length - e.value;
+                for (var i = 0; i < n; i++)
+                {
+                    $.each(Map, function(i, v){
+                        v.pop();
+                    });
+                }
+            }
+        }
+
+        Draw();
+    }
+
+    /**
+     * Clears map and sets it back to default
+     */
     this.ClearMap = function()
     {
         Map = [
@@ -223,9 +253,6 @@ function MapDesigner(canvas)
         Draw();
     }
 
-    canvas.onmousedown = function(e) { mouseDownHandler(e); }
-    canvas.onmouseup = function(e) { mouseUpHandler(e); }
-    canvas.onmousemove = function(e) { mouseMoveHandler(e); }
     canvas.ondblclick = function(e) { mouseDoubleClickHandler(e); }
     canvas.onclick = function(e) { mouseClickHandler(e); }
 
