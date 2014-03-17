@@ -70,7 +70,7 @@ function MapDesigner(canvas)
             }
         }
 
-        $('#map').text(JSON.stringify(Map));
+        $('#map_input').text(JSON.stringify(Map));
     }
 
     /**
@@ -165,13 +165,13 @@ function MapDesigner(canvas)
 
         if (canUpdate)
         {
-            $('#map_input').addClass('has-success');
-            $('#map_input').removeClass('has-error');
+            $('#map_input_area').addClass('has-success');
+            $('#map_input_area').removeClass('has-error');
             Map = newMap;
             Draw();
         } else {
-            $('#map_input').removeClass('has-success');
-            $('#map_input').addClass('has-error');
+            $('#map_input_area').removeClass('has-success');
+            $('#map_input_area').addClass('has-error');
         }
 
     }

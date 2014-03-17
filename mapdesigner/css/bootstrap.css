@@ -1690,7 +1690,7 @@ output {
 }
 .form-control {
   display: block;
-  width: 100%;
+  width: 25%;
   height: 34px;
   padding: 6px 12px;
   font-size: 14px;
@@ -1729,7 +1729,7 @@ fieldset[disabled] .form-control {
   opacity: 1;
 }
 textarea.form-control {
-  height: auto;
+  height: 200px;
 }
 input[type="search"] {
   -webkit-appearance: none;
