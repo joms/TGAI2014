@@ -10,23 +10,21 @@ function navigator(path, map)
         "DOWN\n",
         "UP\n"
     ];
-
-    this.movelist = [];
 }
 
 navigator.prototype.move = function(num)
 {
     var p = this.path[num];
-    console.log (num)
+/*    console.log (num)
     console.log("X  Y");
     console.log(p.parent.y +", "+p.parent.x); // Seems like x and y needs på be flipped ... yes, it hurts
-    console.log(p.y +", "+p.x);
+    console.log(p.y +", "+p.x);*/
 
     var m;
 
     if (p.y == p.parent.y)
     {
-        console.log("Vertical move");
+        //console.log("Vertical move");
         if (p.x - 1 == p.parent.x) // Vertical move
         {
             m = 2; // Down
@@ -34,7 +32,7 @@ navigator.prototype.move = function(num)
             m = 3; // Up
         }
     } else {
-        console.log("Horizontal move");
+        //console.log("Horizontal move");
         if (p.y - 1 == p.parent.y) // Horizontal move
         {
             m = 0; // right
@@ -44,7 +42,6 @@ navigator.prototype.move = function(num)
     }
 
     this.update(p.x, p.y, num+10);
-    this.movelist.push(this.moves[m]);
     return this.moves[m];
 }
 
