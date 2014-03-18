@@ -30,6 +30,16 @@ Debugging:
 
 #### Requirement specs on tactics
 
-**Defencive**
+**Defencive mode**   
+The bots defaultmode.
 
-**Offencive**
+It tries to stay away from other players, while trying to get powerups (whenever those are implemented). 
+
+
+
+**Offencive mode**   
+*Triggered if*   
+
+1. There's only two players left on the map
+2. Another player comes too close
+ - In this case, it'll be checked if there's an escaperoute one can use whilst dropping a bomb.
