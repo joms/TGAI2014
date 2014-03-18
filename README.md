@@ -25,3 +25,11 @@ Debugging:
 2. Do not kill real humans
 3. Random like a boss?
 4. Evasive Behaviour - Stay away from other bots if there are > 2 other bots on the map, to prevent lockins.
+
+---
+
+#### Requirement specs on tactics
+
+**Defencive**
+
+**Offencive*
