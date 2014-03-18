@@ -32,4 +32,4 @@ Debugging:
 
 **Defencive**
 
-**Offencive*
+**Offencive**
