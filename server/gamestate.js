@@ -1,9 +1,9 @@
-exports = gamestate;
+var parser = require('./parser.js');
 
-require('./parser.js');
-
-gamestate = function()
+function gamestate(socket)
 {
+    this.socket = socket;
+
     this.alive = true;
     this.powerups = [];
     this.state = "ready";
@@ -18,15 +18,21 @@ gamestate = function()
 
 gamestate.prototype.Update = function(data)
 {
+    console.log(data.type);
     if (data.type == "ok")
     {
-        this.state == ready;
+        this.state == "ready";
+
+        if (this.commands.length > 0)
+        {
+            this.socket.write(this.commands[0]);
+            this.commands.shift();
+        }
     } else if (data.type == "status update") {
-        var p = parse(data);
+        var p = parser.parse(data);
         this.map = p.map;
         this.bombs = data.bombs;
         this.players = data.players;
-
 
         this.state = "waiting";
     } else if (data.type == "end round") {
@@ -34,5 +40,6 @@ gamestate.prototype.Update = function(data)
     } else if (data.type == "dead") {
         this.alive = false;
     }
-
 }
+
+module.exports = gamestate;

@@ -1,6 +1,4 @@
-parse = exports.parser;
-
-var parser = function (data) {
+exports.parse = function (data) {
     var localdata;
     var weight = { bad: 0, spawn: 10, grass: 10, rock: 1};
 
@@ -33,6 +31,5 @@ var parser = function (data) {
             }
         }
     }
-
     return {map: map};
 }

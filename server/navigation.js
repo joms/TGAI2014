@@ -10,6 +10,8 @@ function navigator(path, map)
         "DOWN\n",
         "UP\n"
     ];
+
+    this.movelist = [];
 }
 
 navigator.prototype.move = function(num)
@@ -42,6 +44,7 @@ navigator.prototype.move = function(num)
     }
 
     this.update(p.x, p.y, num+10);
+    this.movelist.push(this.moves[m]);
     return this.moves[m];
 }
 
