@@ -20,7 +20,7 @@ function gamestate(socket)
 gamestate.prototype.Update = function(data)
 {
     if (data.type == "status update") {
-        this.map = parser.parse(data.map);
+        this.map = parser.ParseMap(data.map);
         this.bombs = data.bombs;
         this.players = data.players;
         this.me.x = data.x;

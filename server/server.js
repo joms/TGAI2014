@@ -52,7 +52,7 @@ client.on('data', function(data) {
     // Pathplanning
     var graph = new Graph(GameState.map);
     var start = graph.nodes[GameState.me.x][GameState.me.y];
-    var end  = graph.nodes[11][11];
+    var end  = graph.nodes[11][11]; // Static path in an open map
     var result = astar.search(graph.nodes, start, end);
 
     // Find what the next step is called
