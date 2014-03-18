@@ -1,7 +1,9 @@
 var net = require('net');
+
 require('./astar.js');
-var p = require('./parser.js');
+var GameStateHandler = require('./gamestate.js');
 var Navigator = require('./navigation.js');
+
 var HOST = '127.0.0.1';
 var PORT = 54321;
 var client = new net.Socket();
@@ -9,35 +11,35 @@ var client = new net.Socket();
 
 //------------------------------------------
 var dummydata = {
-  type: "status update",
-  players: [
-    { id: 1, x: 6, y: 6 }
-  ],
-  bombs: [
-    { x: 6, y:6, state:0 }
-  ],
-  x: 1,
-  y: 1,
-  height: 8,
-  width: 8,
-  map: [
-    "++++++++",
-    "+..####+",
-    "+.#####+",
-    "+######+",
-    "+######+",
-    "+#####.+",
-    "+####..+",
-    "++++++++"
-  ]
-}
+    type: "status update",
+    players: [
+        { id: 1, x: 6, y: 6 }
+    ],
+    bombs: [
+    ],
+    x: 1,
+    y: 1,
+    height: 8,
+    width: 8,
+    map: [
+        "++++++++",
+        "+..####+",
+        "+.#####+",
+        "+######+",
+        "+######+",
+        "+#####.+",
+        "+####..+",
+        "++++++++"
+    ]
+};
 //------------------------------------------
 
-
+var GameState = new GameStateHandler();
 
 client.connect(PORT, HOST, function() {
     console.log('CONNECTED TO: ' + HOST + ':' + PORT);
-    client.write('martinerkul');
+    client.write('Rand.ai\n');
+    client.write('JSON\n');
 });
 
 client.on('error', function(data) {
@@ -47,8 +49,7 @@ client.on('error', function(data) {
 
 client.on('data', function(data) {
     console.log('DATA: ' + data);
-	var created = true 
-	var mapblob = p.parser(dummydata)
+    GameState.Update(data);
 	randommove()
 });
 
