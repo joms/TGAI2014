@@ -6,6 +6,35 @@ var HOST = '127.0.0.1';
 var PORT = 54321;
 var client = new net.Socket();
 
+
+//------------------------------------------
+var dummydata = {
+  type: "status update",
+  players: [
+    { id: 1, x: 6, y: 6 }
+  ],
+  bombs: [
+    { x: 6, y:6, state:0 }
+  ],
+  x: 1,
+  y: 1,
+  height: 8,
+  width: 8,
+  map: [
+    "++++++++",
+    "+..####+",
+    "+.#####+",
+    "+######+",
+    "+######+",
+    "+#####.+",
+    "+####..+",
+    "++++++++"
+  ]
+}
+//------------------------------------------
+
+
+
 client.connect(PORT, HOST, function() {
     console.log('CONNECTED TO: ' + HOST + ':' + PORT);
     client.write('martinerkul');
@@ -19,7 +48,7 @@ client.on('error', function(data) {
 client.on('data', function(data) {
     console.log('DATA: ' + data);
 	var created = true 
-	var mapblob = p.parser(data, created)
+	var mapblob = p.parser(dummydata)
 	randommove()
 });
 
@@ -55,7 +84,7 @@ n.update(start.x, start.y, "X");
 
 for (var i = 0; i < result.length; i++)
 {
-    console.log(n.move(i));
+  //  console.log(n.move(i));
 }
 
-console.log(n.map);
+//console.log(n.map);
