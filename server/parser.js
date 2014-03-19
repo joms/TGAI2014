@@ -1,15 +1,25 @@
+exports.CalcDist = function (players, you)
+{
+var pld = new Array(players.length)
+
+for (var i = 0; i < players.length; i++){
+        pld[i] = lineDistance (players[i], you)
+}
+
+Array.min = function( array ){
+    return Math.min.apply( Math, array );
+};
+
+var result = pld
+pld = null
+
+return (Array.min(result)) 
+}
+
+
+
 exports.ParseMap = function (data)
 {
-/**
-* Sorry to say, but this must be reimplemented
-* 
-    var map = new Array(data.height)
-
-    for (var i = 0; i < data.players.length; i++){
-        pld[i] = lineDistance (data.players[i], data)
-        console.log ("Player " + i + ": " + data.players[i].x + " " + data.players[i].y + " Distance "+ pld[i])
-    }
-**/
 
     var map = [];
 
