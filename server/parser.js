@@ -1,26 +1,25 @@
 exports.CalcDist = function (players, you)
 {
-var pld = new Array(players.length)
+    var pld = new Array(players.length)
 
-for (var i = 0; i < players.length; i++){
+    for (var i = 0; i < players.length; i++){
         pld[i] = lineDistance (players[i], you)
-}
+    }
 
-Array.min = function( array ){
-    return Math.min.apply( Math, array );
-};
+    Array.min = function( array ){
+        return Math.min.apply( Math, array );
+    };
 
-var result = pld
-pld = null
+    var result = pld
+    pld = null
 
-return (Array.min(result)) 
+    return (Array.min(result))
 }
 
 
 
 exports.ParseMap = function (data)
 {
-
     var map = [];
 
     for (var i = 0; i < data.length; i++)

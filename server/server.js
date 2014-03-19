@@ -8,7 +8,6 @@ var HOST = '127.0.0.1';
 var PORT = 54321;
 var client = new net.Socket();
 
-
 /*------------------------------------------
 var dummydata = {
     type: "status update",
@@ -36,10 +35,14 @@ var dummydata = {
 
 var GameState = new GameStateHandler(client);
 
-client.connect(PORT, HOST, function() {
-    console.log('CONNECTED TO: ' + HOST + ':' + PORT);
-    client.write('JSON\n');
-});
+function Connect()
+{
+    client.connect(PORT, HOST, function() {
+        console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+        client.write('JSON\n');
+    });
+}
+Connect();
 
 client.on('error', function(data) {
     console.log('ERROR: ' + data);
@@ -48,7 +51,7 @@ client.on('error', function(data) {
 
 client.on('data', function(data) {
     GameState.Update(JSON.parse(data.toString("utf-8")));
-
+    /*
     // Pathplanning
     var graph = new Graph(GameState.map);
     var start = graph.nodes[GameState.me.x][GameState.me.y];
@@ -62,11 +65,23 @@ client.on('data', function(data) {
 
     //console.log(GameState.players);
 	//randommove()
+    */
 });
 
-client.on('close', function() {
-    console.log('Connection closed');
-    client.destroy();
+client.on('close', function(error) {
+    if (error == true)
+    {
+        console.log("Unexpected disconnection");
+    } else {
+        client.destroy();
+        console.log("Disconnected. Trying reconnect in 1 second");
+
+        client.destroy();
+        var recon = setTimeout(function(){
+            Connect();
+            clearTimeout(recon);
+        }, 1000);
+    }
 });
 
 function randommove() {
