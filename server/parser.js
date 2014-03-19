@@ -2,8 +2,7 @@ exports.ParseMap = function (data)
 {
 /**
 * Sorry to say, but this must be reimplemented
-
-    var pld = new Array()
+* 
     var map = new Array(data.height)
 
     for (var i = 0; i < data.players.length; i++){
@@ -43,7 +42,7 @@ function Weight(point)
     else if (point == "_") {
         return weight.spawn;
     }
-    else if (point == "") {
+    else if (point == " ") {
         return weight.grass;
     }
 }
