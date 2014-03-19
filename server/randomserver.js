@@ -38,7 +38,8 @@ var GameState = new GameStateHandler(client);
 
 client.connect(PORT, HOST, function() {
     console.log('CONNECTED TO: ' + HOST + ':' + PORT);
-    client.write('JSON\n');
+    client.write('JSON\n')
+    client.write("NAME RANDOM");
 });
 
 client.on('error', function(data) {
