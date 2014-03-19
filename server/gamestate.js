@@ -31,11 +31,13 @@ gamestate.prototype.Update = function(data)
         if (this.commands.length == 0)
         {
             this.PlanPath();
+            console.log("Gief comandz");
         }
         if (this.commands.length > 0)
         {
             this.socket.write(this.commands[0]);
             this.commands.shift();
+            console.log(this.commands.length);
         }
 
         //this.state = "waiting";
@@ -46,6 +48,9 @@ gamestate.prototype.Update = function(data)
     }
 }
 
+/**
+ * Plans a new path ahead, and adds it to the commandlist
+ */
 gamestate.prototype.PlanPath = function()
 {
     // Pathplanning
