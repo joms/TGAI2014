@@ -41,7 +41,7 @@ navigator.prototype.move = function(num)
         }
     }
 
-    this.update(p.x, p.y, num+10);
+    this.update(p.x, p.y, num + 10);
     return this.moves[m];
 }
 

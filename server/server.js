@@ -1,13 +1,9 @@
 var net = require('net');
-
-require('./astar.js');
 var GameStateHandler = require('./gamestate.js');
-var Navigator = require('./navigation.js');
 
 var HOST = '127.0.0.1';
 var PORT = 54321;
 var client = new net.Socket();
-
 
 /*------------------------------------------
 var dummydata = {
@@ -36,10 +32,14 @@ var dummydata = {
 
 var GameState = new GameStateHandler(client);
 
-client.connect(PORT, HOST, function() {
-    console.log('CONNECTED TO: ' + HOST + ':' + PORT);
-    client.write('JSON\n');
-});
+function Connect()
+{
+    client.connect(PORT, HOST, function() {
+        console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+        client.write('JSON\n');
+    });
+}
+Connect();
 
 client.on('error', function(data) {
     console.log('ERROR: ' + data);
@@ -49,24 +49,24 @@ client.on('error', function(data) {
 client.on('data', function(data) {
     GameState.Update(JSON.parse(data.toString("utf-8")));
 
-    // Pathplanning
-    var graph = new Graph(GameState.map);
-    var start = graph.nodes[GameState.me.x][GameState.me.y];
-    var end  = graph.nodes[11][11]; // Static path in an open map
-    var result = astar.search(graph.nodes, start, end);
-
-    // Find what the next step is called
-    var n = new Navigator(result, GameState.map);
-    // Execute!
-    client.write(n.move(0));
-
     //console.log(GameState.players);
 	//randommove()
 });
 
-client.on('close', function() {
-    console.log('Connection closed');
-    client.destroy();
+client.on('close', function(error) {
+    if (error == true)
+    {
+        console.log("Unexpected disconnection");
+    } else {
+        client.destroy();
+        console.log("Disconnected. Trying reconnect in 1 second");
+
+        client.destroy();
+        var recon = setTimeout(function(){
+            Connect();
+            clearTimeout(recon);
+        }, 1000);
+    }
 });
 
 function randommove() {
