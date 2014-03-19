@@ -33,9 +33,9 @@
                     </div>
                 </div>
                 <div class="form-horizontal form-group" id="map_input_area">
-                    <label for="map_width" class="col-sm-2 control-label">Map</label>
+                    <label for="map_input" class="col-sm-2 control-label">Map</label>
                     <div class="col-sm-10">
-                        <textarea onblur="designer.Update(this.value);" class="form-control" id="map_input" ></textarea>
+                        <textarea class="form-control" id="map_input" ></textarea>
                     </div>
                 </div>
                 <div class="form-horizontal form-group">
@@ -55,7 +55,7 @@
 
     var legend = document.getElementById('legend');
     var ctx = legend.getContext("2d");
-    var tiles = [0, 1, 2, 'X'];
+    var tiles = ['+', '#', '.', '_'];
     var explanation = ["Indestructible wall", "Destructible rock", "Walkable grass", "Player start"];
 
     var w = 50;
@@ -64,25 +64,25 @@
     var offset = 25;
 
     for (var  i= 0; i < tiles.length; i++){
-        if (tiles[i] == 0)
+        if (tiles[i] == '+')
         {
             ctx.fillStyle = '#666';
             ctx.fillRect(w , (h * i) + (i  * spacing), w, h);
             ctx.fillText(explanation[i], w * 2 + 5, (h * i) + (i * spacing) + (h / 2 + 5));
         }
-        else if (tiles[i] == 1)
+        else if (tiles[i] == '#')
         {
             ctx.fillStyle = '#CCC';
             ctx.fillRect(w , (h * i) + (i  * spacing), w, h);
             ctx.fillText(explanation[i], w * 2 + 5, (h * i) + (i * spacing) + (h / 2 + 5));
         }
-        else if (tiles[i] == 2)
+        else if (tiles[i] == '.')
         {
             ctx.fillStyle = '#696';
             ctx.fillRect(w , (h * i) + (i  * spacing), w, h);
             ctx.fillText(explanation[i], w * 2 + 5, (h * i) + (i * spacing) + (h / 2 + 5));
         }
-        else if (tiles[i] == 'X')
+        else if (tiles[i] == '_')
         {
             ctx.fillStyle = '#696';
             ctx.fillRect(w , (h * i) + (i  * spacing), w, h);

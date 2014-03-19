@@ -1,9 +1,9 @@
 /**
- * 0 = Undestroyable wall
- * 1 = Destroyable wall
- * 2 = Grass
+ * + = Undestroyable wall
+ * # = Destroyable wall
+ * . = Grass
+ * _ = Spawn
  *
- * X = Player start
  */
 
 function MapDesigner(canvas)
@@ -12,14 +12,14 @@ function MapDesigner(canvas)
     var ctx = canvas.getContext('2d');
 
     var Map = [
-        [0,0,0,0,0,0,0,0],
-        [0,'X',2,1,1,1,1,0],
-        [0,2,1,1,1,1,1,0],
-        [0,1,1,1,1,1,1,0],
-        [0,1,1,1,1,1,1,0],
-        [0,1,1,1,1,1,2,0],
-        [0,1,1,1,1,2,'X',0],
-        [0,0,0,0,0,0,0,0]
+        '++++++++',
+        '+_.####+',
+        '+.#####+',
+        '+######+',
+        '+######+',
+        '+#####.+',
+        '+####._+',
+        '++++++++'
     ];
 
     var clickStart = {mouse: [0,0], tile: [0,0]};
@@ -42,35 +42,51 @@ function MapDesigner(canvas)
         var offset1 = w / 4;
         var offset2 = (h / 4) * 2;
 
+        var spawns = [];
+
+        //$('#map_input').val('');
+        $('#map_input').text(tiles[0]+","+tiles[1]+"\n");
+
         // Handling colors and shapes according to whatever number's returned from map
-        for (var i = 0; i < tiles[0]; i++){
-            for (var  j= 0; j < tiles[1]; j++){
-                if (Map[i][j] == 0)
+        for (var i = 0; i < Map.length; i++){
+            for (var  j= 0; j < Map[i].length; j++){
+                if (Map[i][j] == '+')
                 {
                     ctx.fillStyle = '#666';
                     ctx.fillRect(j * w + (j * spacing), i * h + (i * spacing), w, h);
                 }
-                else if (Map[i][j] == 1)
+                else if (Map[i][j] == '#')
                 {
                     ctx.fillStyle = '#CCC';
                     ctx.fillRect(j * w + (j * spacing), i * h + (i * spacing), w, h);
                 }
-                else if (Map[i][j] == 2)
+                else if (Map[i][j] == '.')
                 {
                     ctx.fillStyle = '#696';
                     ctx.fillRect(j * w + (j * spacing), i * h + (i * spacing), w, h);
                 }
-                else if (Map[i][j] == 'X')
+                else if (Map[i][j] == '_')
                 {
                     ctx.fillStyle = '#696';
                     ctx.fillRect(j * w + (j * spacing), i * h + (i * spacing), w, h);
                     ctx.fillStyle = '#33B5E5';
                     ctx.fillRect(j * w + (j * spacing) + offset1, i * h + (i * spacing) + offset1, w - offset2, h - offset2);
+
+                    spawns.push([i,j]);
                 }
             }
         }
 
-        $('#map_input').text(JSON.stringify(Map));
+        $('#map_input').append(spawns.length+"\n");
+        for (var i = 0; i < spawns.length; i++)
+        {
+            $('#map_input').append(spawns[i][0]+","+spawns[i][1]+"\n");
+        }
+
+        for (var i = 0; i < Map.length; i++)
+        {
+            $('#map_input').append(Map[i]+"\n");
+        }
     }
 
     /**
@@ -80,19 +96,23 @@ function MapDesigner(canvas)
     function mouseClickHandler(e)
     {
         var clickedTile = FindTile(e.clientX, e.clientY);
-        switch(Map[clickedTile.y][clickedTile.x])
+
+        var str = Map[clickedTile.y];
+        var c = str[clickedTile.x];
+
+        switch(c)
         {
-            case 0:
-                Map[clickedTile.y][clickedTile.x] = 1;
+            case '+':
+                Map[clickedTile.y] = str.replaceAt(clickedTile.x, '#');
                 break;
-            case 1:
-                Map[clickedTile.y][clickedTile.x] = 2;
+            case '#':
+                Map[clickedTile.y] = str.replaceAt(clickedTile.x, '.');
                 break;
-            case 2:
-                Map[clickedTile.y][clickedTile.x] = 'X';
+            case '.':
+                Map[clickedTile.y] = str.replaceAt(clickedTile.x, '_');
                 break;
             default:
-                Map[clickedTile.y][clickedTile.x] = 0;
+                Map[clickedTile.y] = str.replaceAt(clickedTile.x, '+');
         }
 
         Draw();
@@ -105,9 +125,10 @@ function MapDesigner(canvas)
     function mouseDoubleClickHandler(e)
     {
         var clickedTile = FindTile(e.clientX, e.clientY);
-        if (Map[clickedTile.y][clickedTile.x] !== 0)
+        var str = Map[clickedTile.y];
+        if (str[clickedTile.x] !== '+')
         {
-            Map[clickedTile.y][clickedTile.x] = 0;
+            Map[clickedTile.y] = str.replaceAt(clickedTile.x, '+');
             Draw();
         }
     }
@@ -132,51 +153,6 @@ function MapDesigner(canvas)
     }
 
     /**
-     * Updates map on trigger from designer
-     * @param map
-     * @constructor
-     */
-    this.Update = function(map)
-    {
-        var newMap;
-        var canUpdate = true;
-
-        try {
-            newMap = JSON.parse(map);
-        } catch (e) {
-            canUpdate = false;
-        }
-
-        var tiles = [0, 1, 2, 'X'];
-
-        if (typeof(newMap) === "object")
-        {
-            newMap.forEach(function(d){
-                d.forEach(function(e){
-                    if ($.inArray(e, tiles) == -1)
-                    {
-                        canUpdate = false;
-                    }
-                });
-            });
-        } else {
-            canUpdate = false;
-        }
-
-        if (canUpdate)
-        {
-            $('#map_input_area').addClass('has-success');
-            $('#map_input_area').removeClass('has-error');
-            Map = newMap;
-            Draw();
-        } else {
-            $('#map_input_area').removeClass('has-success');
-            $('#map_input_area').addClass('has-error');
-        }
-
-    }
-
-    /**
      * Updates size of the map
      * @param e
      * @constructor
@@ -190,19 +166,15 @@ function MapDesigner(canvas)
                 var ml = e.value - Map.length;
                 for (var i = 0; i < ml; i++)
                 {
-                    var l = parseInt($('#map_width').val());
-                    var arr = Array(l+1).join('0').split('').map(parseFloat)
-                    Map.push(arr);
+                    var len = parseInt($('#map_width').val());
+                    var str = new Array(len + 1).join('+');
+                    Map.push(str);
                 }
             }
 
             if (e.value < Map.length)
             {
-                var n = Map.length - e.value;
-                for (var i = 0; i < n; i++)
-                {
-                    Map.pop();
-                }
+                Map.pop();
             }
         }
 
@@ -210,24 +182,19 @@ function MapDesigner(canvas)
         {
             if (e.value > Map[0].length)
             {
-                var n = e.value - Map[0].length;
-                console.log(n);
-                for (var i = 0; i < n; i++)
+                for (var i = 0; i < Map.length; i++)
                 {
-                    $.each(Map, function(i, v){
-                        v.push(0);
-                    });
+                    var str = Map[i];
+                    Map[i] = str + "+";
                 }
             }
 
             if (e.value < Map[0].length)
             {
-                var n = Map[0].length - e.value;
-                for (var i = 0; i < n; i++)
+                for (var i = 0; i < Map.length; i++)
                 {
-                    $.each(Map, function(i, v){
-                        v.pop();
-                    });
+                    var str = Map[i];
+                    Map[i] = str.substring(0, str.length - 1);
                 }
             }
         }
@@ -241,15 +208,16 @@ function MapDesigner(canvas)
     this.ClearMap = function()
     {
         Map = [
-            [0,0,0,0,0,0,0,0],
-            [0,'X',2,1,1,1,1,0],
-            [0,2,1,1,1,1,1,0],
-            [0,1,1,1,1,1,1,0],
-            [0,1,1,1,1,1,1,0],
-            [0,1,1,1,1,1,2,0],
-            [0,1,1,1,1,2,'X',0],
-            [0,0,0,0,0,0,0,0]
+            '++++++++',
+            '+_.####+',
+            '+.#####+',
+            '+######+',
+            '+######+',
+            '+#####.+',
+            '+####._+',
+            '++++++++'
         ];
+
         Draw();
     }
 
@@ -257,4 +225,8 @@ function MapDesigner(canvas)
     canvas.onclick = function(e) { mouseClickHandler(e); }
 
     Draw();
+}
+
+String.prototype.replaceAt=function(index, character) {
+    return this.substr(0, index) + character + this.substr(index+character.length);
 }
