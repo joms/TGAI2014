@@ -70,13 +70,9 @@ gamestate.prototype.PlanPath = function()
 
     // Find what the next step is called
     var n = new Navigator(result, this.map);
-    if (n.path.length == 0)
+    if (n.path.length != 0)
     {
-        console.log("rand-move");
-        this.socket.write(n.Random());
-    } else {
         this.socket.write(n.move(0));
-        console.log(n.move(0));
     }
 }
 
@@ -89,10 +85,14 @@ gamestate.prototype.PlanBombs = function()
     for (var i = 0; i < this.bombs.length; i++)
     {
         var b = this.bombs[i];
-
-        if (b.y == this.me.y) // We might have a problem
+        console.log(b);
+        console.log(this.me.x+","+this.me.y);
+        if (b.y - 2 < this.me.y && b.y + 2 > this.me.y)
         {
-            
+            if (b.x - 2 < this.me.x && b.x + 2 > this.me.x)
+            {
+                console.log("You be dead...");
+            }
         }
     }
 }
