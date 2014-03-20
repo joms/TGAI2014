@@ -12,6 +12,7 @@ function gamestate(socket)
     this.me = {};
     this.flee = false;
     this.blacklist = [];
+    this.scarybombs = [];
 
     this.commands = [];
     this.lastcommand = "";
@@ -90,7 +91,6 @@ gamestate.prototype.PlanPath = function()
         } else {
             this.Write(n.move(0));
         }
-        console.log(n.NextTile(0));
     }
 }
 
@@ -123,10 +123,26 @@ gamestate.prototype.SquareSearch = function(r)
     //for (var i = 0; i < this.map.length; i++)
     //    distArr.push([]);
 
+    console.log(this.me);
+    console.log(this.target);
+
     for (var x = this.me.x - r; x < this.me.x + r; x++)
     {
         for (var y = this.me.y - r; y < this.me.y + r; y++)
         {
+            //console.log(x +", "+y);
+            var d = lineDistance({x: this.me.x, y: this.me.y}, {x: x, y: y})
+
+            var index = -1;
+            if (this.blacklist.length > 0)
+            {
+                for(var i = 0; i < this.blacklist.length; i++) {
+                    if (this.blacklist[i].x === x && this.blacklist[i].y === y) {
+                        index = i;
+                    }
+                }
+            }
+
             if (this.map[y][x] == 1 && index == -1)
             {
                 distArr.push({x: x, y: y, d: d});
@@ -134,7 +150,7 @@ gamestate.prototype.SquareSearch = function(r)
         }
     }
 
-    distArr.sort(function(a, b) {return a[2] - b[2]})
+    distArr.sort(function(a, b) {return a[2] - b[2]});
     this.blacklist.push(distArr[0]);
     return distArr[0];
 }
