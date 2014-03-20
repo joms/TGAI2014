@@ -48,7 +48,12 @@ client.on('error', function(data) {
 });
 
 client.on('data', function(data) {
-    GameState.Update(JSON.parse(data.toString("utf-8")));
+    var d = data.toString("utf-8").split("\n");
+    d.pop();
+    for (var i = 0; i < d.length; i++)
+    {
+        GameState.Update(JSON.parse(d[i]));
+    }
 
     //console.log(GameState.players);
 	//randommove()
