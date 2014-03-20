@@ -28,6 +28,11 @@ gamestate.prototype.Update = function(data)
         this.me.x = data.x;
         this.me.y = data.y;
 
+        if (this.bombs.length > 0)
+        {
+            this.PlanBombs();
+        }
+
         if (this.commands.length == 0)
         {
             this.PlanPath();
@@ -52,24 +57,44 @@ gamestate.prototype.Update = function(data)
 gamestate.prototype.PlanPath = function()
 {
     // Pathplanning
+    var r = Math.floor(Math.random()*this.players.length);
     var graph = new Graph(this.map);
     var start = graph.nodes[this.me.y][this.me.x];
-    var end  = graph.nodes[this.players[0].y][this.players[0].x]; // Static path in an open map
+    if (this.target.length > 0)
+    {
+        var end = graph.nodes[this.target[1]][this.target[0]];
+    } else {
+        var end  = graph.nodes[this.players[r].y][this.players[r].x]; // Static path in an open map
+    }
     var result = astar.search(graph.nodes, start, end);
 
     // Find what the next step is called
     var n = new Navigator(result, this.map);
-    if (n.path.length > 0)
+    if (n.path.length == 0)
     {
+        console.log("rand-move");
+        this.socket.write(n.Random());
+    } else {
         this.socket.write(n.move(0));
         console.log(n.move(0));
     }
-    /*
-    for (var i = 1; i < result.length; i++)
+}
+
+/**
+ * Add bomb-locations to the map, and weight accordingly
+ */
+gamestate.prototype.PlanBombs = function()
+{
+    // Can it hit me?
+    for (var i = 0; i < this.bombs.length; i++)
     {
-        this.commands.push(n.move(i));
+        var b = this.bombs[i];
+
+        if (b.y == this.me.y) // We might have a problem
+        {
+            
+        }
     }
-    */
 }
 
 module.exports = gamestate;
