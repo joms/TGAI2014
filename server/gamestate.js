@@ -10,8 +10,11 @@ function gamestate(socket)
     this.state = "ready";
     this.target = [];
     this.me = {};
+    this.flee = false;
+    this.blacklist = [];
 
     this.commands = [];
+    this.lastcommand = "";
 
     this.map = [];
     this.bombs = [];
@@ -21,7 +24,7 @@ function gamestate(socket)
 gamestate.prototype.Update = function(data)
 {
     if (data.type == "status update") {
-        this.map = parser.ParseMap(data.map);
+        this.map = parser.ParseMap(data.map, this.flee);
         this.bombs = data.bombs;
         this.players = data.players;
         this.me.x = data.x;
@@ -30,6 +33,8 @@ gamestate.prototype.Update = function(data)
         if (this.bombs.length > 0)
         {
             this.PlanBombs();
+        } else {
+            this.flee = false;
         }
 
         if (this.commands.length == 0)
@@ -38,7 +43,7 @@ gamestate.prototype.Update = function(data)
         }
         if (this.commands.length > 0)
         {
-            this.socket.write(this.commands[0]);
+            this.Write(this.commands[0]);
             this.commands.shift();
         }
 
@@ -46,7 +51,7 @@ gamestate.prototype.Update = function(data)
     } else if (data.type == "end round") {
 
     } else if (data.type == "dead") {
-        this.socket.write("SAY PERKELE\n");
+        this.Write("SAY PERKELE\n");
     }
 }
 
@@ -60,13 +65,16 @@ gamestate.prototype.PlanPath = function()
     var graph = new Graph(this.map);
     var start = graph.nodes[this.me.y][this.me.x];
 
-    if (this.me.x == this.target[0] == this.me.y == this.target[1]) this.target = [];
+    if (this.me.x == this.target[0] && this.me.y == this.target[1])
+    {
+        this.target = [];
+    }
 
     if (this.target.length > 0)
     {
         var end = graph.nodes[this.target[1]][this.target[0]];
     } else {
-        var end  = graph.nodes[this.players[r].y][this.players[r].x]; // Static path in an open map
+        var end  = graph.nodes[this.players[r].y][this.players[r].x];
     }
     var result = astar.search(graph.nodes, start, end);
 
@@ -74,7 +82,15 @@ gamestate.prototype.PlanPath = function()
     var n = new Navigator(result, this.map);
     if (n.path.length != 0)
     {
-        this.socket.write(n.move(0));
+        if (n.NextTile(0) == "ROCK")
+        {
+            this.Write(n.move(0));
+            this.Write("BOMB\n");
+            this.flee = true;
+        } else {
+            this.Write(n.move(0));
+        }
+        console.log(n.NextTile(0));
     }
 }
 
@@ -87,29 +103,66 @@ gamestate.prototype.PlanBombs = function()
     for (var i = 0; i < this.bombs.length; i++)
     {
         var b = this.bombs[i];
-        console.log(b);
-        console.log(this.me.x+","+this.me.y);
         if (b.y - 2 < this.me.y && b.y + 2 > this.me.y)
         {
             if (b.x - 2 < this.me.x && b.x + 2 > this.me.x)
             {
-                this.target = [this.me.x, this.me.y+1];
+                var t = this.SquareSearch(1);
+                this.target = [t.x, t.y];
+                //console.log(this.target);
+                this.flee = true;
             }
         }
     }
+    this.SquareSearch(1);
 }
 
 gamestate.prototype.SquareSearch = function(r)
 {
-    var scan = {x: this.me.x - r};
+    var distArr = [];
+    //for (var i = 0; i < this.map.length; i++)
+    //    distArr.push([]);
 
-        for scan.x = you.x - radius, you.x + radius {
-            for scan.y = you.y - radius, you.y + radius {
-                d = getdistance (you, scan)
-                if not distancearray[scan.x][scan.y] then
-                {distancearray[x][y] = d}
+    for (var x = this.me.x - r; x < this.me.x + r; x++)
+    {
+        for (var y = this.me.y - r; y < this.me.y + r; y++)
+        {
+            if (this.map[y][x] == 1 && index == -1)
+            {
+                distArr.push({x: x, y: y, d: d});
             }
         }
+    }
+
+    distArr.sort(function(a, b) {return a[2] - b[2]})
+    this.blacklist.push(distArr[0]);
+    return distArr[0];
+}
+
+gamestate.prototype.Write = function(input)
+{
+    var log = [
+        "RIGHT\n",
+        "LEFT\n",
+        "DOWN\n",
+        "UP\n"
+    ];
+    this.socket.write(input);
+    if (log.indexOf(input) > -1) this.lastcommand = input;
+}
+
+function lineDistance( point1, point2 )
+{
+    var xs = 0;
+    var ys = 0;
+
+    xs = point2.x - point1.x;
+    xs = xs * xs;
+
+    ys = point2.y - point1.y;
+    ys = ys * ys;
+
+    return Math.sqrt( xs + ys );
 }
 
 module.exports = gamestate;
