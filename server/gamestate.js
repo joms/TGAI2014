@@ -6,7 +6,6 @@ function gamestate(socket)
 {
     this.socket = socket;
 
-    this.alive = true;
     this.powerups = [];
     this.state = "ready";
     this.target = [];
@@ -47,7 +46,7 @@ gamestate.prototype.Update = function(data)
     } else if (data.type == "end round") {
 
     } else if (data.type == "dead") {
-        this.alive = false;
+        this.socket.write("SAY PERKELE\n");
     }
 }
 
@@ -60,6 +59,9 @@ gamestate.prototype.PlanPath = function()
     var r = Math.floor(Math.random()*this.players.length);
     var graph = new Graph(this.map);
     var start = graph.nodes[this.me.y][this.me.x];
+
+    if (this.me.x == this.target[0] == this.me.y == this.target[1]) this.target = [];
+
     if (this.target.length > 0)
     {
         var end = graph.nodes[this.target[1]][this.target[0]];
@@ -91,10 +93,23 @@ gamestate.prototype.PlanBombs = function()
         {
             if (b.x - 2 < this.me.x && b.x + 2 > this.me.x)
             {
-                console.log("You be dead...");
+                this.target = [this.me.x, this.me.y+1];
             }
         }
     }
+}
+
+gamestate.prototype.SquareSearch = function(r)
+{
+    var scan = {x: this.me.x - r};
+
+        for scan.x = you.x - radius, you.x + radius {
+            for scan.y = you.y - radius, you.y + radius {
+                d = getdistance (you, scan)
+                if not distancearray[scan.x][scan.y] then
+                {distancearray[x][y] = d}
+            }
+        }
 }
 
 module.exports = gamestate;
