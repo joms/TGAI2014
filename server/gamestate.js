@@ -31,13 +31,11 @@ gamestate.prototype.Update = function(data)
         if (this.commands.length == 0)
         {
             this.PlanPath();
-            console.log("Gief comandz");
         }
         if (this.commands.length > 0)
         {
             this.socket.write(this.commands[0]);
             this.commands.shift();
-            console.log(this.commands.length);
         }
 
         //this.state = "waiting";
@@ -55,18 +53,23 @@ gamestate.prototype.PlanPath = function()
 {
     // Pathplanning
     var graph = new Graph(this.map);
-    var start = graph.nodes[this.me.x][this.me.y];
-    var end  = graph.nodes[11][11]; // Static path in an open map
+    var start = graph.nodes[this.me.y][this.me.x];
+    var end  = graph.nodes[this.players[0].y][this.players[0].x]; // Static path in an open map
     var result = astar.search(graph.nodes, start, end);
 
     // Find what the next step is called
     var n = new Navigator(result, this.map);
-    this.socket.write(n.move(0));
-
+    if (n.path.length > 0)
+    {
+        this.socket.write(n.move(0));
+        console.log(n.move(0));
+    }
+    /*
     for (var i = 1; i < result.length; i++)
     {
         this.commands.push(n.move(i));
     }
+    */
 }
 
 module.exports = gamestate;

@@ -45,6 +45,11 @@ navigator.prototype.move = function(num)
     return this.moves[m];
 }
 
+navigator.prototype.Random = function()
+{
+    return this.moves[Math.floor(Math.random()* 4)];
+}
+
 navigator.prototype.update = function(x, y, i)
 {
     this.map[x][y] = i;

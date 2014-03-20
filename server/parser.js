@@ -31,7 +31,6 @@ exports.ParseMap = function (data)
         }
         map.push(t);
     }
-
     return map;
 }
 
