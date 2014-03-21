@@ -50,7 +50,9 @@ gamestate.prototype.Update = function(data)
     } else if (data.type == "end round") {
 
     } else if (data.type == "dead") {
-        this.Write("SAY PERKELE\n");
+        var deadlist = ["but.. whyy?", "Perkele!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"]
+        var i = Math.floor(Math.random()*deadlist.length)
+        this.Write(deadlist[i]);
     }
 }
 
@@ -79,14 +81,34 @@ gamestate.prototype.PlanPath = function()
 
     // Find what the next step is called
     var n = new Navigator(result, this.map);
+    var dontmove = false
+            
     if (n.path.length != 0)
     {
         if (n.NextTile(0) == "ROCK")
         {
             this.Write(n.move(0));
             this.Write("BOMB\n");
-        } else {
-            this.Write(n.move(0));
+        } 
+
+        else {
+            
+            console.log ("-----------------------")
+            console.log (this.SafeSpot(this.me.x, this.me.y))
+            console.log (this.bombs.length) 
+            console.log ("-----------------------")
+           
+            if (this.SafeSpot(this.me.x, this.me.y) == true) {
+                if (this.bombs.length >= 1) {
+                    console.log ("not moving")
+                    var dontmove = true
+                }
+            }
+            
+            
+            if (dontmove == false) {
+                this.Write(n.move(0));
+            }
         }
     }
 }
@@ -106,7 +128,8 @@ gamestate.prototype.PlanBombs = function()
         console.log(this.target);
         this.flee = true;
     }
-    this.flee = false;
+    else {this.flee = false;}
+
 }
 
 gamestate.prototype.SquareSearch = function(r)
@@ -181,8 +204,8 @@ gamestate.prototype.SafeSpot = function(x,y)
             safe = false;
         }
     }
-    console.log ("safe")
-    console.log (safe)
+    //console.log ("safe")
+    //console.log (safe)
     return safe;
 /*    for (var i = 0; i < this.bombs.length; i++)
     {
