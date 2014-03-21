@@ -99,7 +99,7 @@ gamestate.prototype.PlanBombs = function()
     }
 }
 
-gamestate.prototype.SquareSearch = function(r)
+/*gamestate.prototype.SquareSearch = function(r)
 {
     var scan = {x: this.me.x - r};
 
@@ -110,6 +110,6 @@ gamestate.prototype.SquareSearch = function(r)
                 {distancearray[x][y] = d}
             }
         }
-}
+}*/
 
 module.exports = gamestate;
