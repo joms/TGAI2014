@@ -18,8 +18,9 @@ exports.CalcDist = function (players, you)
 
 
 
-exports.ParseMap = function (data)
+exports.ParseMap = function (data, flee)
 {
+    this.flee = flee;
     var map = [];
 
     for (var i = 0; i < data.length; i++)
@@ -31,6 +32,7 @@ exports.ParseMap = function (data)
         }
         map.push(t);
     }
+
     return map;
 }
 
@@ -42,7 +44,10 @@ function Weight(point)
         return weight.wall;
     }
     else if (point == "#") {
-        return weight.rock;
+        if (this.flee == true)
+            return 0;
+        else
+            return weight.rock;
     }
     else if (point == ".") {
         return weight.grass;

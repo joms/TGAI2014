@@ -50,6 +50,23 @@ navigator.prototype.Random = function()
     return this.moves[Math.floor(Math.random()* 4)];
 }
 
+navigator.prototype.NextTile = function(num)
+{
+    var p = this.path[num];
+    var m = this.map[p.x][p.y];
+    switch(m)
+    {
+        case 10:
+            return "ROCK";
+        case 1:
+            return "GRASS";
+        case 0:
+            return "WALL";
+        default:
+            return "UNKOWN";
+    }
+}
+
 navigator.prototype.update = function(x, y, i)
 {
     this.map[x][y] = i;
