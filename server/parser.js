@@ -38,7 +38,7 @@ exports.ParseMap = function (data, flee)
 
 function Weight(point)
 {
-    var weight = { wall: 0, spawn: 1, grass: 1, rock: 10};
+    var weight = { wall: 0, spawn: 1, grass: 1, rock: 9};
 
     if (point == "+") {
         return weight.wall;

@@ -108,7 +108,7 @@ gamestate.prototype.PlanBombs = function()
             if (b.x - 2 < this.me.x && b.x + 2 > this.me.x)
             {
                 var t = this.SquareSearch(1);
-                this.target = [t.x, t.y];
+                //this.target = [t.x, t.y];
                 //console.log(this.target);
                 this.flee = true;
             }
@@ -126,13 +126,25 @@ gamestate.prototype.SquareSearch = function(r)
     console.log(this.me);
     console.log(this.target);
 
-    for (var x = this.me.x - r; x < this.me.x + r; x++)
+    var m = this.map;
+
+    var start = {x: this.me.x - r, y: this.me.y - r}
+    var stop = {x: this.me.x + r, y: this.me.y + r}
+    if (start.x < 0) {start.x == 0}
+    if (start.y < 0) {start.y == 0}
+    if (stop.x > this.map[0].length) {stop.x == this.map[0].length}
+    if (stop.y > this.map.length) {stop.y == this.map.length}
+
+    console.log(start);
+    console.log(stop);
+
+    for (var x = start.x; x <= stop.x; x++)
     {
-        for (var y = this.me.y - r; y < this.me.y + r; y++)
+        for (var y = start.y ; y <= stop.y; y++)
         {
             //console.log(x +", "+y);
             var d = lineDistance({x: this.me.x, y: this.me.y}, {x: x, y: y})
-
+/*
             var index = -1;
             if (this.blacklist.length > 0)
             {
@@ -141,9 +153,18 @@ gamestate.prototype.SquareSearch = function(r)
                         index = i;
                     }
                 }
+            }*/
+
+            m[y][x] = "Y";
+
+            if (this.map[y][x] == 1)
+            {
+                distArr.push({x: x, y: y, d: d});
             }
         }
     }
+    m[this.me.y][this.me.x] = "X";
+    console.log(m);
 
     distArr.sort(function(a, b) {return a[2] - b[2]});
     this.blacklist.push(distArr[0]);
