@@ -117,7 +117,7 @@ gamestate.prototype.PlanBombs = function()
     this.SquareSearch(1);
 }
 
-/*gamestate.prototype.SquareSearch = function(r)
+gamestate.prototype.SquareSearch = function(r)
 {
     var distArr = [];
     //for (var i = 0; i < this.map.length; i++)
@@ -142,15 +142,7 @@ gamestate.prototype.PlanBombs = function()
                     }
                 }
             }
-
-            if (this.map[y][x] == 1 && index == -1)
-            {
-                distArr.push({x: x, y: y, d: d});
-            }
         }
-<<<<<<< HEAD
-}*/
-=======
     }
 
     distArr.sort(function(a, b) {return a[2] - b[2]});
@@ -183,6 +175,5 @@ function lineDistance( point1, point2 )
 
     return Math.sqrt( xs + ys );
 }
->>>>>>> 21e9f066b959284fe44b2df53476f29b267cd26d
 
 module.exports = gamestate;
