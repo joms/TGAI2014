@@ -85,6 +85,7 @@ gamestate.prototype.PlanPath = function()
         {
             this.Write(n.move(0));
             this.Write("BOMB\n");
+            this.PlanBombs();
         } else {
             this.Write(n.move(0));
         }
@@ -99,11 +100,13 @@ gamestate.prototype.PlanBombs = function()
     // Can it hit me?
     if (this.SafeSpot(this.me.x, this.me.y) == false)
     {
-        var t = this.SquareSearch(2);
+        var t = this.SquareSearch(1);
         //console.log(t);
         this.target = [t.x, t.y];
-        //console.log(this.target);
+        console.log(this.target);
         this.flee = true;
+    } else {
+        console.log("You're safe...");
     }
     this.flee = false;
 }
@@ -111,42 +114,38 @@ gamestate.prototype.PlanBombs = function()
 gamestate.prototype.SquareSearch = function(r)
 {
     var distArr = [];
-
-    var start = {x: this.me.x - r, y: this.me.y - r}
-    var stop = {x: this.me.x + r, y: this.me.y + r}
-    if (start.x < 0) {start.x = 0;}
-    if (start.y < 0) {start.y = 0;}
-    if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
-    if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
-
-    for (var x = start.x; x <= stop.x; x++)
+    var m = this.map;
+    while (distArr.length == 0)
     {
-        for (var y = start.y ; y <= stop.y; y++)
-        {
-            //console.log(x +", "+y);
-            var d = lineDistance({x: this.me.x, y: this.me.y}, {x: x, y: y})
+        var start = {x: this.me.x - r, y: this.me.y - r}
+        var stop = {x: this.me.x + r, y: this.me.y + r}
+        if (start.x < 0) {start.x = 0;}
+        if (start.y < 0) {start.y = 0;}
+        if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
+        if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
 
-            if (this.SafeSpot(x, y) == true)
+        for (var x = start.x; x <= stop.x; x++)
+        {
+            for (var y = start.y ; y <= stop.y; y++)
             {
-                try{
+                var d = lineDistance({x: this.me.x, y: this.me.y}, {x: x, y: y})
+
+                if (this.SafeSpot(x, y) == true)
+                {
+                    m[y][x] = "S";
                     if (this.map[y][x] == 1)
                     {
-                        if (x == this.me.x && y == this.me.y)
+/*                        if (x == this.me.x && y == this.me.y)
                         {
                             return {x: x, y: y, d: d};
-                        }
+                        }*/
                         distArr.push({x: x, y: y, d: d});
                     }
-                } catch (err)
-                {
-                    console.log(err);
-                    console.log("x: "+x+", y: "+y);
-                    console.log(this.map);
-                }
+                } else { m[y][x] = "U"; }
             }
         }
+        r++;
     }
-
     distArr.sort(function(a, b) {return a[2] - b[2]});
     return distArr[0];
 }
@@ -182,30 +181,6 @@ gamestate.prototype.SafeSpot = function(x,y)
     }
 
     return safe;
-/*    for (var i = 0; i < this.bombs.length; i++)
-    {
-        var b = this.bombs[i];
-        if (b.y - 2 <= y && b.y + 2 >= y)
-        {
-            if (b.x - 2 <= x && b.x + 2 >= x)
-            {
-*//*                var m = this.map;
-                m[b.y-2][b.x] = 'O';
-                m[b.y-1][b.x] = 'O';
-                m[b.y][b.x] = 'O';
-                m[b.y+1][b.x] = 'O';
-                m[b.y+2][b.x] = 'O';
-                m[b.y][b.x-1] = 'O';
-                m[b.y][b.x-2] = 'O';
-                m[b.y][b.x+1] = 'O';
-                m[b.y][b.x+2] = 'O';
-                m[y][x] = 'X';
-                console.log(m);*//*
-                return false;
-            }
-        }
-    }
-    return true;*/
 }
 
 function lineDistance( point1, point2 )
