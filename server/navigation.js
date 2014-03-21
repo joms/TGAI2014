@@ -67,6 +67,28 @@ navigator.prototype.NextTile = function(num)
     }
 }
 
+navigator.prototype.Opposite = function(move)
+{
+    var moves = [
+        "RIGHT\n",
+        "LEFT\n",
+        "DOWN\n",
+        "UP\n"
+    ];
+
+    switch(move)
+    {
+        case "RIGHT\n":
+            return this.moves[1];
+        case "LEFT\n":
+            return this.moves[0];
+        case "DOWN\n":
+            return this.moves[3];
+        case "UP\n":
+            return this.moves[2];
+    }
+}
+
 navigator.prototype.update = function(x, y, i)
 {
     this.map[x][y] = i;

@@ -11,8 +11,6 @@ function gamestate(socket)
     this.target = [];
     this.me = {};
     this.flee = false;
-    this.blacklist = [];
-    this.scarybombs = [];
 
     this.commands = [];
     this.lastcommand = "";
@@ -75,7 +73,7 @@ gamestate.prototype.PlanPath = function()
     {
         var end = graph.nodes[this.target[1]][this.target[0]];
     } else {
-        var end  = graph.nodes[this.players[r].y][this.players[r].x];
+        var end  = graph.nodes[this.players[0].y][this.players[0].x];
     }
     var result = astar.search(graph.nodes, start, end);
 
@@ -87,7 +85,6 @@ gamestate.prototype.PlanPath = function()
         {
             this.Write(n.move(0));
             this.Write("BOMB\n");
-            this.flee = true;
         } else {
             this.Write(n.move(0));
         }
@@ -100,43 +97,27 @@ gamestate.prototype.PlanPath = function()
 gamestate.prototype.PlanBombs = function()
 {
     // Can it hit me?
-    for (var i = 0; i < this.bombs.length; i++)
+    if (this.SafeSpot(this.me.x, this.me.y) == false)
     {
-        var b = this.bombs[i];
-        if (b.y - 2 < this.me.y && b.y + 2 > this.me.y)
-        {
-            if (b.x - 2 < this.me.x && b.x + 2 > this.me.x)
-            {
-                var t = this.SquareSearch(1);
-                //this.target = [t.x, t.y];
-                //console.log(this.target);
-                this.flee = true;
-            }
-        }
+        var t = this.SquareSearch(2);
+        //console.log(t);
+        this.target = [t.x, t.y];
+        //console.log(this.target);
+        this.flee = true;
     }
-    this.SquareSearch(1);
+    this.flee = false;
 }
 
 gamestate.prototype.SquareSearch = function(r)
 {
     var distArr = [];
-    //for (var i = 0; i < this.map.length; i++)
-    //    distArr.push([]);
-
-    console.log(this.me);
-    console.log(this.target);
-
-    var m = this.map;
 
     var start = {x: this.me.x - r, y: this.me.y - r}
     var stop = {x: this.me.x + r, y: this.me.y + r}
-    if (start.x < 0) {start.x == 0}
-    if (start.y < 0) {start.y == 0}
-    if (stop.x > this.map[0].length) {stop.x == this.map[0].length}
-    if (stop.y > this.map.length) {stop.y == this.map.length}
-
-    console.log(start);
-    console.log(stop);
+    if (start.x < 0) {start.x = 0;}
+    if (start.y < 0) {start.y = 0;}
+    if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
+    if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
 
     for (var x = start.x; x <= stop.x; x++)
     {
@@ -144,30 +125,29 @@ gamestate.prototype.SquareSearch = function(r)
         {
             //console.log(x +", "+y);
             var d = lineDistance({x: this.me.x, y: this.me.y}, {x: x, y: y})
-/*
-            var index = -1;
-            if (this.blacklist.length > 0)
+
+            if (this.SafeSpot(x, y) == true)
             {
-                for(var i = 0; i < this.blacklist.length; i++) {
-                    if (this.blacklist[i].x === x && this.blacklist[i].y === y) {
-                        index = i;
+                try{
+                    if (this.map[y][x] == 1)
+                    {
+                        if (x == this.me.x && y == this.me.y)
+                        {
+                            return {x: x, y: y, d: d};
+                        }
+                        distArr.push({x: x, y: y, d: d});
                     }
+                } catch (err)
+                {
+                    console.log(err);
+                    console.log("x: "+x+", y: "+y);
+                    console.log(this.map);
                 }
-            }*/
-
-            m[y][x] = "Y";
-
-            if (this.map[y][x] == 1)
-            {
-                distArr.push({x: x, y: y, d: d});
             }
         }
     }
-    m[this.me.y][this.me.x] = "X";
-    console.log(m);
 
     distArr.sort(function(a, b) {return a[2] - b[2]});
-    this.blacklist.push(distArr[0]);
     return distArr[0];
 }
 
@@ -181,6 +161,51 @@ gamestate.prototype.Write = function(input)
     ];
     this.socket.write(input);
     if (log.indexOf(input) > -1) this.lastcommand = input;
+}
+
+gamestate.prototype.SafeSpot = function(x,y)
+{
+    var safe = true;
+    for (var i = 0; i < this.bombs.length; i++)
+    {
+        var b = this.bombs[i];
+
+        if (x == b.x && b.y -2 <= y && b.y +2 >= y)
+        {
+            safe = false;
+        }
+
+        if (y == b.y && b.x -2 <= x && b.x +2 >= x)
+        {
+            safe = false;
+        }
+    }
+
+    return safe;
+/*    for (var i = 0; i < this.bombs.length; i++)
+    {
+        var b = this.bombs[i];
+        if (b.y - 2 <= y && b.y + 2 >= y)
+        {
+            if (b.x - 2 <= x && b.x + 2 >= x)
+            {
+*//*                var m = this.map;
+                m[b.y-2][b.x] = 'O';
+                m[b.y-1][b.x] = 'O';
+                m[b.y][b.x] = 'O';
+                m[b.y+1][b.x] = 'O';
+                m[b.y+2][b.x] = 'O';
+                m[b.y][b.x-1] = 'O';
+                m[b.y][b.x-2] = 'O';
+                m[b.y][b.x+1] = 'O';
+                m[b.y][b.x+2] = 'O';
+                m[y][x] = 'X';
+                console.log(m);*//*
+                return false;
+            }
+        }
+    }
+    return true;*/
 }
 
 function lineDistance( point1, point2 )
