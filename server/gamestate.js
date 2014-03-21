@@ -102,7 +102,8 @@ gamestate.prototype.PlanBombs = function()
         var t = this.SquareSearch(2);
         //console.log(t);
         this.target = [t.x, t.y];
-        //console.log(this.target);
+        console.log("target");
+        console.log(this.target);
         this.flee = true;
     }
     this.flee = false;
@@ -180,7 +181,8 @@ gamestate.prototype.SafeSpot = function(x,y)
             safe = false;
         }
     }
-
+    console.log ("safe")
+    console.log (safe)
     return safe;
 /*    for (var i = 0; i < this.bombs.length; i++)
     {
