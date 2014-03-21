@@ -50,7 +50,7 @@ gamestate.prototype.Update = function(data)
     } else if (data.type == "end round") {
 
     } else if (data.type == "dead") {
-        var deadlist = ["but.. whyy?", "Perkele!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"]
+        var deadlist = ["but.. whyy?", "MORRADI ER FEIT!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"]
         var i = Math.floor(Math.random()*deadlist.length)
         this.Write(deadlist[i]);
     }
