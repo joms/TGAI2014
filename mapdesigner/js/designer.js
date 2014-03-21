@@ -45,7 +45,7 @@ function MapDesigner(canvas)
         var spawns = [];
 
         //$('#map_input').val('');
-        $('#map_input').text(tiles[0]+","+tiles[1]+"\n");
+        $('#map_input').text(tiles[0]+"x"+tiles[1]+"\n");
 
         // Handling colors and shapes according to whatever number's returned from map
         for (var i = 0; i < Map.length; i++){
