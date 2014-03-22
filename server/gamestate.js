@@ -9,12 +9,9 @@ function gamestate(socket)
     this.powerups = [];
     this.state = "ready";
     this.target = [];
-    this.me = {};
+    this.me = {x: -1, y: -1};
     this.flee = false;
     this.scarybombs = [];
-
-    this.commands = [];
-    this.lastcommand = "";
 
     this.map = [];
     this.bombs = [];
@@ -29,23 +26,16 @@ gamestate.prototype.Update = function(data)
         this.players = data.players;
         this.me.x = data.x;
         this.me.y = data.y;
-
+/*
         if (this.bombs.length > 0)
         {
             this.PlanBombs();
         } else {
             this.flee = false;
         }
+*/
 
-        if (this.commands.length == 0)
-        {
-            this.PlanPath();
-        }
-        if (this.commands.length > 0)
-        {
-            this.Write(this.commands[0]);
-            this.commands.shift();
-        }
+        this.PlanPath();
     } else if (data.type == "end round") {
 
     } else if (data.type == "dead") {
@@ -60,61 +50,49 @@ gamestate.prototype.Update = function(data)
  */
 gamestate.prototype.PlanPath = function()
 {
-    // Define a new a* graph
-    var graph = new Graph(this.map);
-    // Set the start location to me
-    var start = graph.nodes[this.me.y][this.me.x];
-
-    /**
-     * This whole piece need to be changed!
-     */
-    if (this.me.x == this.target[0] && this.me.y == this.target[1])
+    if (this.me.x != this.target[0] || this.me.y != this.target[1])
     {
-        this.target = [];
-    }
+        // Define a new a* graph
+        var graph = new Graph(this.map);
+        // Set the start location to me
+        var start = graph.nodes[this.me.y][this.me.x];
 
-    if (this.target.length > 0)
-    {
-        var end = graph.nodes[this.target[1]][this.target[0]];
-    } else {
-        this.target[0] = this.players[0].y
-        this.target[1] = this.players[0].x
-        
-        var end  = graph.nodes[this.players[0].y][this.players[0].x];
-    }
-    var result = astar.search(graph.nodes, start, end);
+        this.target[1] = this.players[0].y;
+        this.target[0] = this.players[0].x;
 
-    // Find what the next step is called
-    var n = new Navigator(result, this.map);
-    var dontmove = false
-            
-    if (n.path.length != 0)
-    {
-        if (n.NextTile(0) == "ROCK")
+        var end  = graph.nodes[this.target.y][this.target.x];
+
+        var result = astar.search(graph.nodes, start, end);
+
+        // Find what the next step is called
+        var n = new Navigator(result, this.map);
+        var dontmove = false;
+
+        console.log("result.length: "+result.length);
+
+        if (n.path.length != 0)
         {
-            this.Write(n.move(0));
-            this.Write("BOMB\n");
-        } 
-
-        else {
-            
-            console.log ("-----------------------")
-            console.log (this.SafeSpot(this.me.x, this.me.y))
-            console.log (this.bombs.length) 
-            console.log ("-----------------------")
-           
-            if (this.SafeSpot(this.me.x, this.me.y) == true) {
-                if (this.bombs.length >= 1) {
-                    //this.target = [];
-                    console.log ("not moving")
-                    var dontmove = true
-                }
-            }
-            
-            
-            if (dontmove == false) {
-                console.log ("Moving to" + this.target)
+            if (n.NextTile(0) == "ROCK")
+            {
                 this.Write(n.move(0));
+                this.Write("BOMB\n");
+            } else {
+
+                console.log ("-----------------------");
+                console.log (this.SafeSpot(this.me.x, this.me.y));
+                console.log (this.bombs.length);
+                console.log ("-----------------------");
+
+                if (this.SafeSpot(this.me.x, this.me.y) == true && this.bombs.length >= 1) {
+                    //this.target = [];
+                    console.log ("not moving");
+                    dontmove = true;
+                }
+
+                if (dontmove == false) {
+                    console.log("Moving to " + JSON.stringify(this.target));
+                    this.Write(n.move(0));
+                }
             }
         }
     }
@@ -235,7 +213,7 @@ gamestate.prototype.Write = function(input)
         "UP\n"
     ];
     this.socket.write(input);
-    if (log.indexOf(input) > -1) this.lastcommand = input;
+    console.log(input);
 }
 
 /**
