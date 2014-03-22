@@ -46,8 +46,6 @@ gamestate.prototype.Update = function(data)
             this.Write(this.commands[0]);
             this.commands.shift();
         }
-
-        //this.state = "waiting";
     } else if (data.type == "end round") {
 
     } else if (data.type == "dead") {
@@ -62,11 +60,14 @@ gamestate.prototype.Update = function(data)
  */
 gamestate.prototype.PlanPath = function()
 {
-    // Pathplanning
-    var r = Math.floor(Math.random()*this.players.length);
+    // Define a new a* graph
     var graph = new Graph(this.map);
+    // Set the start location to me
     var start = graph.nodes[this.me.y][this.me.x];
 
+    /**
+     * This whole piece need to be changed!
+     */
     if (this.me.x == this.target[0] && this.me.y == this.target[1])
     {
         this.target = [];
@@ -128,8 +129,10 @@ gamestate.prototype.PlanBombs = function()
         {
             for (var j = 0; j < this.bombs.length; j++)
             {
+                // Is this bomb a scary bomb?
                 if (i.x == j.x && i.y == j.y)
                 {
+                    // Search for safe spots
                     var t = this.SquareSearch(2);
                     //console.log(t);
                     this.target = [t.x, t.y];
@@ -160,22 +163,27 @@ gamestate.prototype.SquareSearch = function(r)
     {
         for (var y = start.y ; y <= stop.y; y++)
         {
-            
-            var d = lineDistance({x: this.me.x, y: this.me.y}, {x: x, y: y})
 
+            // Is this a safe spot?
             if (this.SafeSpot(x, y) == true)
             {  
                 try{
+
+                    // Is this a walkable spot?
                     if (this.map[y][x] == 1)
                     {
+                        var d = lineDistance({x: this.me.x, y: this.me.y}, {x: x, y: y})
+
+                        // Is this where I'm standing? If so, we're safe - for now
                         if (x == this.me.x && y == this.me.y)
                         {
                             return {x: x, y: y, d: d};
                         }
+
                         distArr.push({x: x, y: y, d: d});
                     }
-                } catch (err)
-                {
+                } catch (err) {
+                    // This shouldn't happen anymore - was because of the search going outside the map
                     console.log(err);
                     console.log("x: "+x+", y: "+y);
                     console.log(this.map);
@@ -187,13 +195,18 @@ gamestate.prototype.SquareSearch = function(r)
         }
     }
 
+    // Sort the distance array based on it's length
     distArr.sort(function(a, b) {return a[2] - b[2]});
     console.log(distArr[0])
     console.log(this.me)
+    // Return the closest point
     return distArr[0];
 
 }
 
+/**
+ * Send input to server
+ */
 gamestate.prototype.Write = function(input)
 {
     var log = [
@@ -206,6 +219,9 @@ gamestate.prototype.Write = function(input)
     if (log.indexOf(input) > -1) this.lastcommand = input;
 }
 
+/**
+ * Check if a coordinate can be hit by a bomb
+ */
 gamestate.prototype.SafeSpot = function(x,y)
 {
     var safe = true;
@@ -229,32 +245,11 @@ gamestate.prototype.SafeSpot = function(x,y)
     //console.log ("safe")
     //console.log (safe)
     return safe;
-/*    for (var i = 0; i < this.bombs.length; i++)
-    {
-        var b = this.bombs[i];
-        if (b.y - 2 <= y && b.y + 2 >= y)
-        {
-            if (b.x - 2 <= x && b.x + 2 >= x)
-            {
-*//*                var m = this.map;
-                m[b.y-2][b.x] = 'O';
-                m[b.y-1][b.x] = 'O';
-                m[b.y][b.x] = 'O';
-                m[b.y+1][b.x] = 'O';
-                m[b.y+2][b.x] = 'O';
-                m[b.y][b.x-1] = 'O';
-                m[b.y][b.x-2] = 'O';
-                m[b.y][b.x+1] = 'O';
-                m[b.y][b.x+2] = 'O';
-                m[y][x] = 'X';
-                console.log(m);*//*
-                return false;
-            }
-        }
-    }
-    return true;*/
 }
 
+/**
+ * Returns the distance from one {x: x, y: y} to another.
+ */
 function lineDistance( point1, point2 )
 {
     var xs = 0;

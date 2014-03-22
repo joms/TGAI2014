@@ -1,3 +1,6 @@
+/**
+ * Calculates the distance from you to all the players
+ */
 exports.CalcDist = function (players, you)
 {
     var pld = new Array(players.length)
@@ -17,7 +20,12 @@ exports.CalcDist = function (players, you)
 }
 
 
-
+/**
+ * Parses the map to a point-based system.
+ *
+ * If flee is set to true, the weighting-function will
+ * treat rocks as non-walkable
+ */
 exports.ParseMap = function (data, flee)
 {
     this.flee = flee;
@@ -36,6 +44,10 @@ exports.ParseMap = function (data, flee)
     return map;
 }
 
+/**
+ * Weights each point according to whatever value we have
+ * defined for that point-type.
+ */
 function Weight(point)
 {
     var weight = { wall: 0, spawn: 1, grass: 1, rock: 9};
@@ -60,6 +72,9 @@ function Weight(point)
     }
 }
 
+/**
+ * Returns the distance from one {x: x, y: y} to another.
+ */
 function lineDistance( point1, point2 )
 {
     var xs = 0;

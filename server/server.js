@@ -32,6 +32,9 @@ var dummydata = {
 
 var GameState = new GameStateHandler(client);
 
+/**
+ * Connects to the server on given port and host
+ */
 function Connect()
 {
     client.connect(PORT, HOST, function() {
@@ -40,6 +43,7 @@ function Connect()
         client.write('NAME GIR\n');
     });
 }
+// Call connect when server.js starts
 Connect();
 
 client.on('error', function(data) {
@@ -48,15 +52,15 @@ client.on('error', function(data) {
 });
 
 client.on('data', function(data) {
+    // Splits data on \n
     var d = data.toString("utf-8").split("\n");
+    // Removes last object in array, as it's an \n
     d.pop();
+    // Send all data-string to Update()
     for (var i = 0; i < d.length; i++)
     {
         GameState.Update(JSON.parse(d[i]));
     }
-
-    //console.log(GameState.players);
-	//randommove()
 });
 
 client.on('close', function(error) {
@@ -68,15 +72,11 @@ client.on('close', function(error) {
         console.log("Disconnected. Trying reconnect in 1 second");
 
         client.destroy();
+
+        // Try to reconnect once in 1 second
         setTimeout(function()
         {
             Connect();
         } , 1000);
     }
 });
-
-function randommove() {
-	var ran = Math.floor((Math.random()*5));
-	var move = ["UP","DOWN","LEFT","RIGHT","BOMB"];
-	client.write(move[ran]);
-}
