@@ -11,6 +11,7 @@ function gamestate(socket)
     this.target = [];
     this.me = {};
     this.flee = false;
+    this.scarybombs = [];
 
     this.commands = [];
     this.lastcommand = "";
@@ -121,14 +122,24 @@ gamestate.prototype.PlanBombs = function()
     // Can it hit me?
     if (this.SafeSpot(this.me.x, this.me.y) == false)
     {
-        var t = this.SquareSearch(2);
-        //console.log(t);
-        this.target = [t.x, t.y];
-        console.log("target");
-        console.log(this.target);
-        this.flee = true;
+        for (var i = 0; i < this.scarybombs.length; i++)
+        {
+            for (var j = 0; j < this.bombs.length; j++)
+            {
+                if (i.x == j.x && i.y == j.y)
+                {
+                    var t = this.SquareSearch(2);
+                    //console.log(t);
+                    this.target = [t.x, t.y];
+                    console.log("target");
+                    console.log(this.target);
+                    this.flee = true;
+                }
+            }
+        }
+    } else {
+        this.flee = false;
     }
-    else {this.flee = false;}
 
 }
 
@@ -190,6 +201,7 @@ gamestate.prototype.Write = function(input)
 gamestate.prototype.SafeSpot = function(x,y)
 {
     var safe = true;
+    this.scarybombs = [];
     for (var i = 0; i < this.bombs.length; i++)
     {
         var b = this.bombs[i];
@@ -197,11 +209,13 @@ gamestate.prototype.SafeSpot = function(x,y)
         if (x == b.x && b.y -2 <= y && b.y +2 >= y)
         {
             safe = false;
+            this.scarybombs.push(b);
         }
 
         if (y == b.y && b.x -2 <= x && b.x +2 >= x)
         {
             safe = false;
+            this.scarybombs.push(b);
         }
     }
     //console.log ("safe")
