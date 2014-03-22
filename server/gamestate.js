@@ -101,6 +101,7 @@ gamestate.prototype.PlanPath = function()
            
             if (this.SafeSpot(this.me.x, this.me.y) == true) {
                 if (this.bombs.length >= 1) {
+                    this.target = [];
                     console.log ("not moving")
                     var dontmove = true
                 }
@@ -108,6 +109,7 @@ gamestate.prototype.PlanPath = function()
             
             
             if (dontmove == false) {
+                console.log ("Moving to" + this.target)
                 this.Write(n.move(0));
             }
         }
@@ -158,11 +160,11 @@ gamestate.prototype.SquareSearch = function(r)
     {
         for (var y = start.y ; y <= stop.y; y++)
         {
-            //console.log(x +", "+y);
+            
             var d = lineDistance({x: this.me.x, y: this.me.y}, {x: x, y: y})
 
             if (this.SafeSpot(x, y) == true)
-            {
+            {  
                 try{
                     if (this.map[y][x] == 1)
                     {
@@ -179,11 +181,17 @@ gamestate.prototype.SquareSearch = function(r)
                     console.log(this.map);
                 }
             }
+            else {
+                 console.log(x +", "+y+" NOT SAFE");
+            }
         }
     }
 
     distArr.sort(function(a, b) {return a[2] - b[2]});
+    console.log(distArr[0])
+    console.log(this.me)
     return distArr[0];
+
 }
 
 gamestate.prototype.Write = function(input)
