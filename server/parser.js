@@ -32,12 +32,14 @@ exports.ParseMap = function (data, flee)
         }
         map.push(t);
     }
-
+    console.log("in ParseMap")
     return map;
 }
 
 function Weight(point)
 {
+    //console.log("Weighting")
+
     var weight = { wall: 0, spawn: 1, grass: 1, rock: 9};
 
     if (point == "+") {

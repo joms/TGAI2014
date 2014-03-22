@@ -22,6 +22,8 @@ function gamestate(socket)
 
 gamestate.prototype.Update = function(data)
 {
+        console.log("in Update")
+
     if (data.type == "status update") {
         this.map = parser.ParseMap(data.map, this.flee);
         this.bombs = data.bombs;
@@ -61,10 +63,13 @@ gamestate.prototype.Update = function(data)
  */
 gamestate.prototype.PlanPath = function()
 {
+        console.log("in PlanPath")
+
     // Pathplanning
     var r = Math.floor(Math.random()*this.players.length);
     var graph = new Graph(this.map);
     var start = graph.nodes[this.me.y][this.me.x];
+    console.log("Target :" + this.target);
 
     if (this.me.x == this.target[0] && this.me.y == this.target[1])
     {
@@ -75,6 +80,9 @@ gamestate.prototype.PlanPath = function()
     {
         var end = graph.nodes[this.target[1]][this.target[0]];
     } else {
+        this.target[0] = this.players[0].y
+        this.target[1] = this.players[0].x
+        
         var end  = graph.nodes[this.players[0].y][this.players[0].x];
     }
     var result = astar.search(graph.nodes, start, end);
@@ -100,7 +108,7 @@ gamestate.prototype.PlanPath = function()
            
             if (this.SafeSpot(this.me.x, this.me.y) == true) {
                 if (this.bombs.length >= 1) {
-                    this.target = [];
+                    //this.target = [];
                     console.log ("not moving")
                     var dontmove = true
                 }
@@ -120,9 +128,13 @@ gamestate.prototype.PlanPath = function()
  */
 gamestate.prototype.PlanBombs = function()
 {
+        console.log("in PlanBombs")
+
     // Can it hit me?
     if (this.SafeSpot(this.me.x, this.me.y) == false)
+    
     {
+    console.log("not on safespot")
         var t = this.SquareSearch(6);
         console.log(t);
         this.target = [t.x, t.y];
@@ -130,7 +142,10 @@ gamestate.prototype.PlanBombs = function()
        // console.log(this.target);
         this.flee = true;
     }
-    else {this.flee = false;}
+    else {
+        this.flee = false;
+        console.log("on safespot")
+    }
 
 }
 
@@ -144,7 +159,8 @@ gamestate.prototype.SquareSearch = function(r)
     if (start.y < 0) {start.y = 0;}
     if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
     if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
-
+    console.log(this.map);
+    
     for (var x = start.x; x <= stop.x; x++)
     {
         for (var y = start.y ; y <= stop.y; y++)
@@ -171,14 +187,14 @@ gamestate.prototype.SquareSearch = function(r)
                 }
             }
             else {
-                 console.log(x +", "+y+" NOT SAFE");
+                 //console.log(x +", "+y+" NOT SAFE");
             }
         }
     }
 
     distArr.sort(function(a, b) {return a[2] - b[2]});
-    console.log(distArr[0])
-    console.log(this.me)
+    console.log("My Position : " + this.me.x + " " + this.me.y)
+
     return distArr[0];
 
 }
@@ -197,6 +213,8 @@ gamestate.prototype.Write = function(input)
 
 gamestate.prototype.SafeSpot = function(x,y)
 {
+       // console.log("in SafeSpot")
+
     var safe = true;
     for (var i = 0; i < this.bombs.length; i++)
     {
@@ -212,8 +230,6 @@ gamestate.prototype.SafeSpot = function(x,y)
             safe = false;
         }
     }
-    //console.log ("safe")
-    //console.log (safe)
     return safe;
 /*    for (var i = 0; i < this.bombs.length; i++)
     {

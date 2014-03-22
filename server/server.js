@@ -1,6 +1,6 @@
 var net = require('net');
 var GameStateHandler = require('./gamestate.js');
-
+var iter = 0 
 var HOST = '127.0.0.1';
 var PORT = 54321;
 var client = new net.Socket();
@@ -48,6 +48,12 @@ client.on('error', function(data) {
 });
 
 client.on('data', function(data) {
+    iter++;
+    for (var i = 0; i < 15; i++){
+        console.log(" ")
+        
+    }
+    console.log("--------Iteration : " + iter + "------")
     var d = data.toString("utf-8").split("\n");
     d.pop();
     for (var i = 0; i < d.length; i++)
