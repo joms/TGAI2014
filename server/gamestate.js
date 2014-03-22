@@ -6,7 +6,6 @@ function gamestate(socket)
 {
     this.socket = socket;
 
-    this.powerups = [];
     this.state = "ready";
     this.target = [];
     this.me = {x: -1, y: -1};
@@ -26,14 +25,16 @@ gamestate.prototype.Update = function(data)
         this.players = data.players;
         this.me.x = data.x;
         this.me.y = data.y;
-/*
+
+        this.target[1] = this.players[0].y;
+        this.target[0] = this.players[0].x;
+
         if (this.bombs.length > 0)
         {
             this.PlanBombs();
         } else {
             this.flee = false;
         }
-*/
 
         this.PlanPath();
     } else if (data.type == "end round") {
@@ -57,10 +58,7 @@ gamestate.prototype.PlanPath = function()
         // Set the start location to me
         var start = graph.nodes[this.me.y][this.me.x];
 
-        this.target[1] = this.players[0].y;
-        this.target[0] = this.players[0].x;
-
-        var end  = graph.nodes[this.target.y][this.target.x];
+        var end  = graph.nodes[this.target[1]][this.target[0]];
 
         var result = astar.search(graph.nodes, start, end);
 
@@ -76,6 +74,7 @@ gamestate.prototype.PlanPath = function()
             {
                 this.Write(n.move(0));
                 this.Write("BOMB\n");
+                this.PlanBombs();
             } else {
 
                 console.log ("-----------------------");
@@ -103,19 +102,15 @@ gamestate.prototype.PlanPath = function()
  */
 gamestate.prototype.PlanBombs = function()
 {
-        console.log("in PlanBombs")
+    console.log("in PlanBombs")
 
     // Can it hit me?
     if (this.SafeSpot(this.me.x, this.me.y) == false)
-    
     {
-
-    console.log("not on safespot")
         var t = this.SquareSearch(6);
         console.log(t);
         this.target = [t.x, t.y];
-       // console.log("target");
-       // console.log(this.target);
+
         this.flee = true;
 
         for (var i = 0; i < this.scarybombs.length; i++)
