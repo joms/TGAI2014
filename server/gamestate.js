@@ -143,11 +143,7 @@ gamestate.prototype.PlanBombs = function()
        // console.log("target");
        // console.log(this.target);
         this.flee = true;
-    }
-    else {
-        this.flee = false;
-        console.log("on safespot")
-    }
+
         for (var i = 0; i < this.scarybombs.length; i++)
         {
             for (var j = 0; j < this.bombs.length; j++)
@@ -163,8 +159,10 @@ gamestate.prototype.PlanBombs = function()
                 }
             }
         }
-    } else {
+    }
+    else {
         this.flee = false;
+        console.log("on safespot")
     }
 
 }
