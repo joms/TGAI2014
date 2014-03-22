@@ -41,7 +41,6 @@ navigator.prototype.move = function(num)
         }
     }
 
-    this.update(p.x, p.y, num + 10);
     return this.moves[m];
 }
 
@@ -50,7 +49,7 @@ navigator.prototype.Random = function()
     return this.moves[Math.floor(Math.random()* 4)];
 }
 
-navigator.prototype.NextTile = function(num)
+navigator.prototype.NextTile = function(num, flee)
 {
     var p = this.path[num];
     var m = this.map[p.x][p.y];

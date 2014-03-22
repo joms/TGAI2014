@@ -74,10 +74,10 @@ client.on('close', function(error) {
         console.log("Disconnected. Trying reconnect in 1 second");
 
         client.destroy();
-        var recon = setTimeout(function(){
+        setTimeout(function()
+        {
             Connect();
-            clearTimeout(recon);
-        }, 1000);
+        } , 1000);
     }
 });
 
