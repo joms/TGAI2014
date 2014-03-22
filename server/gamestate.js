@@ -215,7 +215,7 @@ gamestate.prototype.SquareSearch = function(r)
 
     // Sort the distance array based on it's length
     distArr.sort(function(a, b) {return a[2] - b[2]});
-    
+
     console.log(distArr[0])
     console.log(this.me)
     // Return the closest point

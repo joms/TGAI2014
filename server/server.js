@@ -52,16 +52,13 @@ client.on('error', function(data) {
 });
 
 client.on('data', function(data) {
-<<<<<<< HEAD
     // Splits data on \n
-=======
     iter++;
     for (var i = 0; i < 15; i++){
         console.log(" ")
         
     }
     console.log("--------Iteration : " + iter + "------")
->>>>>>> 0d7d2e5a9e7b3615a8be76082f10157d88324290
     var d = data.toString("utf-8").split("\n");
     // Removes last object in array, as it's an \n
     d.pop();
