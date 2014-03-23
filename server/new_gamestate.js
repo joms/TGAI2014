@@ -30,12 +30,20 @@ gamestate.prototype.Update = function(data)
 
         if (this.bombs.length > 0)
         {
+
             this.WeightBombs();
             if (this.SafeSpot(this.me.x, this.me.y) == false)
             {
                 console.log("UNSAFE");
                 var t = this.SquareSearch(this.me);
-                this.target = [t[0].x, t[0].y];
+                for (var i = 0; i < t.length; i++)
+                {
+                    if (this.CanWalkThere(t[i].x, t[i].y) == true)
+                    {
+                        this.target = [t[i].x, t[i].y];
+                        break;
+                    }
+                }
                 this.fear = true;
             } else {
                 console.log("SAFE");
@@ -49,9 +57,11 @@ gamestate.prototype.Update = function(data)
         // Define a new a* graph
         var graph = new Graph(this.map);
         var start = graph.nodes[this.me.y][this.me.x];
+
         var end  = graph.nodes[this.target[1]][this.target[0]];
         var result = astar.search(graph.nodes, start, end);
 
+        this.map[this.me.y][this.me.x] = 9;
         console.log(this.target);
         console.log(this.map);
 
@@ -98,6 +108,22 @@ gamestate.prototype.WeightBombs = function()
                 this.map[y][b.x] = 0;
             }
         }
+    }
+}
+
+gamestate.prototype.CanWalkThere = function(x,y)
+{
+    var graph = new Graph(this.map);
+    var start = graph.nodes[this.me.y][this.me.x];
+
+    var end  = graph.nodes[y][x];
+    var result = astar.search(graph.nodes, start, end);
+
+    if (result.length > 0)
+    {
+        return true;
+    } else {
+        return false;
     }
 }
 
