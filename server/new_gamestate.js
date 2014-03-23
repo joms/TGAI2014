@@ -26,25 +26,21 @@ gamestate.prototype.Update = function(data)
         this.me.x = data.x;
         this.me.y = data.y;
 
+        console.log(this.fear);
+
         this.target = [this.players[0].x, this.players[0].y];
 
         if (this.bombs.length > 0)
         {
-
             this.WeightBombs();
             if (this.SafeSpot(this.me.x, this.me.y) == false)
             {
                 console.log("UNSAFE");
-                var t = this.SquareSearch(this.me);
-                for (var i = 0; i < t.length; i++)
-                {
-                    if (this.CanWalkThere(t[i].x, t[i].y) == true)
-                    {
-                        this.target = [t[i].x, t[i].y];
-                        break;
-                    }
-                }
                 this.fear = true;
+                this.map = parser.ParseMap(data.map, this.fear);
+                var t = this.SquareSearch(this.me);
+                console.log(t);
+                this.target = [t[0].x, t[0].y];
             } else {
                 console.log("SAFE");
                 console.log(this.me);
@@ -61,9 +57,9 @@ gamestate.prototype.Update = function(data)
         var end  = graph.nodes[this.target[1]][this.target[0]];
         var result = astar.search(graph.nodes, start, end);
 
-        this.map[this.me.y][this.me.x] = 9;
+/*        this.map[this.me.y][this.me.x] = 9;
         console.log(this.target);
-        console.log(this.map);
+        console.log(this.map);*/
 
         // Find what the next step is called
         var n = new Navigator(result, this.map);
@@ -131,6 +127,7 @@ gamestate.prototype.SquareSearch = function(origo)
 {
     var distArr = [];
     var r = 1;
+    console.log("In SquareSearch")
 
     // Prevent search from going outside map
     var start = {x: origo.x - r, y: origo.y - r}
@@ -152,15 +149,21 @@ gamestate.prototype.SquareSearch = function(origo)
                 {
                     if (this.map[y][x] == 1)
                     {
-                        var d = lineDistance({x: origo.x, y: origo.y}, {x: x, y: y})
+                        if (this.CanWalkThere(x, y) == true)
+                        {
+                            var d = lineDistance({x: origo.x, y: origo.y}, {x: x, y: y})
 
-                        distArr.push({x: x, y: y, d: d});
+                            distArr.push({x: x, y: y, d: d});
+                        }
                     }
                 }
             }
         }
         r++;
     }
+
+    console.log(this.map);
+    console.log(distArr);
 
     // Sort the distance array based on it's length
     distArr.sort(function(a, b) {return a[2] - b[2]});
