@@ -30,18 +30,15 @@ gamestate.prototype.Update = function(data)
         this.players = data.players;
         this.me.x = data.x;
         this.me.y = data.y;
-<<<<<<< HEAD
         
         var r = Math.floor(Math.random()*data.players.length)
         this.target = [this.players[r].x, this.players[r].y];
         console.log("target player " + r)
-=======
+
 
         console.log(this.fear);
 
-        this.target = [this.players[0].x, this.players[0].y];
 
->>>>>>> a8ab29fa694666adcde7012ebea36d8af98cf895
         if (this.bombs.length > 0)
         {
             this.WeightBombs();
