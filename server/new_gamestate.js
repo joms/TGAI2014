@@ -20,14 +20,20 @@ function gamestate(socket)
 gamestate.prototype.Update = function(data)
 {
     if (data.type == "status update") {
+        
+        for (var i = 0; i < data.players.length; i++) {
+            console.log(i + " " + data.players[i])
+        }
+        
         this.map = parser.ParseMap(data.map, this.fear);
         this.bombs = data.bombs;
         this.players = data.players;
         this.me.x = data.x;
         this.me.y = data.y;
-
-        this.target = [this.players[0].x, this.players[0].y];
-
+        
+        var r = Math.floor(Math.random()*data.players.length)
+        this.target = [this.players[r].x, this.players[r].y];
+        console.log("target player " + r)
         if (this.bombs.length > 0)
         {
             this.WeightBombs();
@@ -59,17 +65,52 @@ gamestate.prototype.Update = function(data)
         var n = new Navigator(result, this.map);
         if (n.path.length != 0)
         {
-            this.Write(n.move(0));
+            var dontmove = false          
+            
+            if (this.SafeSpot(this.me.x, this.me.y) == true) {
+                console.log ("-----")
+                console.log (n.move(0))
+                console.log ("-----")
+
+               if (n.move(0) == "UP\n") {
+                    if (this.SafeSpot(this.me.x, this.me.y - 1) == false) {
+                        dontmove = true
+                    }
+                }
+                if (n.move(0) == "DOWN\n") {
+                    if (this.SafeSpot(this.me.x, this.me.y + 1) == false) {
+                        dontmove = true
+                    }
+                }
+                if (n.move(0) == "RIGHT\n") {
+                    if (this.SafeSpot(this.me.x + 1, this.me.y) == false) {
+                        dontmove = true
+                    }
+                }
+                if (n.move(0) == "LEFT\n") {
+                    if (this.SafeSpot(this.me.x-1, this.me.y) == false) {
+                        dontmove = true
+                    }
+                }
+           }
+            if (dontmove == false) {
+            this.Write(n.move(0));}
+            else {
+                console.log("not moving")
+            }
             if (n.NextTile(0) == "ROCK")
                 this.Write("BOMB\n");
+
         }
 
     } else if (data.type == "end round") {
 
     } else if (data.type == "dead") {
+        console.log ("this bot is apparently dead")
         var deadlist = ["but.. whyy?", "MORRADI ER FEIT!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"]
         var i = Math.floor(Math.random()*deadlist.length)
-        this.Write(deadlist[i]);
+        this.Write("SAY " + deadlist[i] + "\n");
+        this.fear = false;
     }
 }
 
