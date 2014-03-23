@@ -11,6 +11,7 @@ function gamestate(socket)
     this.players = [];
     this.me = {x: 0, x: 0};
     this.target = [];
+    this.fear = false;
 }
 
 /**
@@ -19,7 +20,7 @@ function gamestate(socket)
 gamestate.prototype.Update = function(data)
 {
     if (data.type == "status update") {
-        this.map = parser.ParseMap(data.map);
+        this.map = parser.ParseMap(data.map, this.fear);
         this.bombs = data.bombs;
         this.players = data.players;
         this.me.x = data.x;
@@ -32,10 +33,16 @@ gamestate.prototype.Update = function(data)
             this.WeightBombs();
             if (this.SafeSpot(this.me.x, this.me.y) == false)
             {
+                console.log("UNSAFE");
                 var t = this.SquareSearch(this.me);
                 this.target = [t[0].x, t[0].y];
+                this.fear = true;
             } else {
                 console.log("SAFE");
+                console.log(this.me);
+                console.log(this.bombs);
+                console.log(data.bombs);
+                this.fear = false;
             }
         }
 
@@ -45,13 +52,16 @@ gamestate.prototype.Update = function(data)
         var end  = graph.nodes[this.target[1]][this.target[0]];
         var result = astar.search(graph.nodes, start, end);
 
+        console.log(this.target);
+        console.log(this.map);
+
         // Find what the next step is called
         var n = new Navigator(result, this.map);
         if (n.path.length != 0)
         {
-            this.socket.write(n.move(0));
+            this.Write(n.move(0));
             if (n.NextTile(0) == "ROCK")
-                this.socket.write("BOMB\n");
+                this.Write("BOMB\n");
         }
 
     } else if (data.type == "end round") {
@@ -59,7 +69,7 @@ gamestate.prototype.Update = function(data)
     } else if (data.type == "dead") {
         var deadlist = ["but.. whyy?", "MORRADI ER FEIT!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"]
         var i = Math.floor(Math.random()*deadlist.length)
-        this.socket.write(deadlist[i]);
+        this.Write(deadlist[i]);
     }
 }
 
@@ -123,6 +133,7 @@ gamestate.prototype.SquareSearch = function(origo)
                 }
             }
         }
+        r++;
     }
 
     // Sort the distance array based on it's length
@@ -154,6 +165,15 @@ gamestate.prototype.SafeSpot = function(x,y)
         }
     }
     return safe;
+}
+
+/**
+ * Send input to server
+ */
+gamestate.prototype.Write = function(input)
+{
+    this.socket.write(input);
+    console.log(input);
 }
 
 /**

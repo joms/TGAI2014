@@ -4,7 +4,7 @@
  * If flee is set to true, the weighting-function will
  * treat rocks as non-walkable
  */
-exports.ParseMap = function (data)
+exports.ParseMap = function (data, fear)
 {
     var map = [];
 
@@ -13,11 +13,11 @@ exports.ParseMap = function (data)
         var t = [];
         for (var j = 0; j < data[i].length; j++)
         {
-            t.push(Weight(data[i][j]));
+            t.push(Weight(data[i][j], fear));
         }
         map.push(t);
     }
-    //console.log("In ParseMap")
+    console.log("In ParseMap")
     return map;
 }
 
@@ -25,15 +25,20 @@ exports.ParseMap = function (data)
  * Weights each point according to whatever value we have
  * defined for that point-type.
  */
-function Weight(point)
+function Weight(point, f)
 {
-    var weight = { wall: 0, walkable: 1, rock: 9};
+    var weight = { wall: 0, walkable: 1, rock: 2};
 
     if (point == "+") {
         return weight.wall;
     }
     else if (point == "#") {
-        return weight.rock;
+        if (f == false)
+        {
+            return weight.rock;
+        } else {
+            return weight.wall;
+        }
     }
     else if (point == ".") {
         return weight.walkable;
