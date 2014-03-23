@@ -1,0 +1,176 @@
+var parser = require('./parser.js');
+require('./astar.js');
+var Navigator = require('./navigation.js');
+
+function gamestate(socket)
+{
+    this.socket = socket;
+
+    this.map;
+    this.bombs = [];
+    this.players = [];
+    this.me = {x: 0, x: 0};
+    this.target = [];
+}
+
+/**
+ * Receive data from server, and start doing stuff
+ */
+gamestate.prototype.Update = function(data)
+{
+    if (data.type == "status update") {
+        this.map = parser.ParseMap(data.map);
+        this.bombs = data.bombs;
+        this.players = data.players;
+        this.me.x = data.x;
+        this.me.y = data.y;
+
+        this.target = [this.players[0].x, this.players[0].y];
+
+        if (this.bombs.length > 0)
+        {
+            this.WeightBombs();
+            if (this.SafeSpot(this.me.x, this.me.y) == false)
+            {
+                var t = this.SquareSearch(this.me);
+                this.target = [t[0].x, t[0].y];
+            } else {
+                console.log("SAFE");
+            }
+        }
+
+        // Define a new a* graph
+        var graph = new Graph(this.map);
+        var start = graph.nodes[this.me.y][this.me.x];
+        var end  = graph.nodes[this.target[1]][this.target[0]];
+        var result = astar.search(graph.nodes, start, end);
+
+        // Find what the next step is called
+        var n = new Navigator(result, this.map);
+        if (n.path.length != 0)
+        {
+            this.socket.write(n.move(0));
+            if (n.NextTile(0) == "ROCK")
+                this.socket.write("BOMB\n");
+        }
+
+    } else if (data.type == "end round") {
+
+    } else if (data.type == "dead") {
+        var deadlist = ["but.. whyy?", "MORRADI ER FEIT!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"]
+        var i = Math.floor(Math.random()*deadlist.length)
+        this.socket.write(deadlist[i]);
+    }
+}
+
+gamestate.prototype.WeightBombs = function()
+{
+    for (var i = 0; i < this.bombs.length; i++)
+    {
+        var b = this.bombs[i];
+        this.map[b.y][b.x] = 0;
+
+        if (b.state <= 3)
+        {
+            var start = {x: b.x - 2, y: b.y - 2};
+            var stop = {x: b.x + 2, y: b.y + 2};
+            if (start.x < 0) {start.x = 0;}
+            if (start.y < 0) {start.y = 0;}
+            if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
+            if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
+
+            for (var x = start.x; x <= stop.x; x++)
+            {
+                this.map[b.y][x] = 0;
+            }
+            for (var y = start.y ; y <= stop.y; y++)
+            {
+                this.map[y][b.x] = 0;
+            }
+        }
+    }
+}
+
+gamestate.prototype.SquareSearch = function(origo)
+{
+    var distArr = [];
+    var r = 1;
+
+    // Prevent search from going outside map
+    var start = {x: origo.x - r, y: origo.y - r}
+    var stop = {x: origo.x + r, y: origo.y + r}
+    if (start.x < 0) {start.x = 0;}
+    if (start.y < 0) {start.y = 0;}
+    if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
+    if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
+
+    while (distArr < 1)
+    {
+        for (var x = start.x; x <= stop.x; x++)
+        {
+            for (var y = start.y ; y <= stop.y; y++)
+            {
+
+                // Is this a safe spot?
+                if (this.SafeSpot(x, y) == true)
+                {
+                    if (this.map[y][x] == 1)
+                    {
+                        var d = lineDistance({x: origo.x, y: origo.y}, {x: x, y: y})
+
+                        distArr.push({x: x, y: y, d: d});
+                    }
+                }
+            }
+        }
+    }
+
+    // Sort the distance array based on it's length
+    distArr.sort(function(a, b) {return a[2] - b[2]});
+
+    return distArr;
+}
+
+/**
+ * Check if a coordinate can be hit by a bomb
+ */
+gamestate.prototype.SafeSpot = function(x,y)
+{
+//    console.log("in SafeSpot")
+
+    var safe = true;
+    for (var i = 0; i < this.bombs.length; i++)
+    {
+        var b = this.bombs[i];
+
+        if (x == b.x && b.y -2 <= y && b.y +2 >= y)
+        {
+            safe = false;
+        }
+
+        if (y == b.y && b.x -2 <= x && b.x +2 >= x)
+        {
+            safe = false;
+        }
+    }
+    return safe;
+}
+
+/**
+ * Returns the distance from one {x: x, y: y} to another.
+ */
+function lineDistance( point1, point2 )
+{
+    var xs = 0;
+    var ys = 0;
+
+    xs = point2.x - point1.x;
+    xs = xs * xs;
+
+    ys = point2.y - point1.y;
+    ys = ys * ys;
+
+    return Math.sqrt( xs + ys );
+}
+
+module.exports = gamestate;

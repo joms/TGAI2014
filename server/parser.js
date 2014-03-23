@@ -1,4 +1,46 @@
 /**
+ * Parses the map to a point-based system.
+ *
+ * If flee is set to true, the weighting-function will
+ * treat rocks as non-walkable
+ */
+exports.ParseMap = function (data)
+{
+    var map = [];
+
+    for (var i = 0; i < data.length; i++)
+    {
+        var t = [];
+        for (var j = 0; j < data[i].length; j++)
+        {
+            t.push(Weight(data[i][j]));
+        }
+        map.push(t);
+    }
+    //console.log("In ParseMap")
+    return map;
+}
+
+/**
+ * Weights each point according to whatever value we have
+ * defined for that point-type.
+ */
+function Weight(point)
+{
+    var weight = { wall: 0, walkable: 1, rock: 9};
+
+    if (point == "+") {
+        return weight.wall;
+    }
+    else if (point == "#") {
+        return weight.rock;
+    }
+    else if (point == ".") {
+        return weight.walkable;
+    }
+}
+
+/**
  * Calculates the distance from you to all the players
  */
 exports.CalcDist = function (players, you)
@@ -17,61 +59,6 @@ exports.CalcDist = function (players, you)
     pld = null
 
     return (Array.min(result))
-}
-
-
-/**
- * Parses the map to a point-based system.
- *
- * If flee is set to true, the weighting-function will
- * treat rocks as non-walkable
- */
-exports.ParseMap = function (data, flee)
-{
-    this.flee = flee;
-    var map = [];
-
-    for (var i = 0; i < data.length; i++)
-    {
-        var t = [];
-        for (var j = 0; j < data[i].length; j++)
-        {
-            t.push(Weight(data[i][j]));
-        }
-        map.push(t);
-    }
-    console.log("in ParseMap")
-    return map;
-}
-
-/**
- * Weights each point according to whatever value we have
- * defined for that point-type.
- */
-function Weight(point)
-{
-    //console.log("Weighting")
-
-    var weight = { wall: 0, spawn: 1, grass: 1, rock: 9};
-
-    if (point == "+") {
-        return weight.wall;
-    }
-    else if (point == "#") {
-        if (this.flee == true)
-            return 0;
-        else
-            return weight.rock;
-    }
-    else if (point == ".") {
-        return weight.grass;
-    }
-    else if (point == "_") {
-        return weight.spawn;
-    }
-    else if (point == " ") {
-        return weight.grass;
-    }
 }
 
 /**

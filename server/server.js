@@ -1,7 +1,7 @@
 var net = require('net');
-var GameStateHandler = require('./gamestate.js');
+var GameStateHandler = require('./new_gamestate.js');
 var iter = 0 
-var HOST = '127.0.0.1';
+var HOST = 'localhost';
 var PORT = 54321;
 var client = new net.Socket();
 
@@ -54,14 +54,16 @@ client.on('error', function(data) {
 client.on('data', function(data) {
     // Splits data on \n
     iter++;
-    for (var i = 0; i < 15; i++){
+/*    for (var i = 0; i < 15; i++){
         console.log(" ")
         
-    }
-    console.log("--------Iteration : " + iter + "------")
+    }*/
+    //console.log("--------Iteration : " + iter + "------")
     var d = data.toString("utf-8").split("\n");
+
     // Removes last object in array, as it's an \n
     d.pop();
+
     // Send all data-string to Update()
     for (var i = 0; i < d.length; i++)
     {
@@ -72,7 +74,7 @@ client.on('data', function(data) {
 client.on('close', function(error) {
     if (error == true)
     {
-        console.log("Unexpected disconnection");
+        console.log("Unexpected disconnect");
     } else {
         client.destroy();
         console.log("Disconnected. Trying reconnect in 1 second");
@@ -86,3 +88,5 @@ client.on('close', function(error) {
         } , 1000);
     }
 });
+
+
