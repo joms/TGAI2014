@@ -34,6 +34,11 @@ gamestate.prototype.Update = function(data)
         console.log(this.fear);
         console.log(this.bombs);
 
+        for (var i = 0; i < this.players.length; i++)
+        {
+            this.map[this.players[i].y][this.players[i].x] = 2;
+        }
+
 
         if (this.bombs.length > 0)
         {
