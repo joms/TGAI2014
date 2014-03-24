@@ -37,14 +37,17 @@ var GameState = new GameStateHandler(client);
  */
 function Connect()
 {
-    client.connect(PORT, HOST, function() {
-        console.log('CONNECTED TO: ' + HOST + ':' + PORT);
-        client.write('JSON\n');
-        client.write('NAME GIR\n');
-    });
+    client.connect(PORT, HOST);
 }
 // Call connect when server.js starts
 Connect();
+
+client.on('connect', function()
+{
+    console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+    client.write('JSON\n');
+    client.write('NAME GIR\n');
+})
 
 client.on('error', function(data) {
     console.log('ERROR: ' + data);
@@ -52,16 +55,13 @@ client.on('error', function(data) {
 });
 
 client.on('data', function(data) {
-   
-    // Splits data on \n
     iter++;
-/*    for (var i = 0; i < 15; i++){
-        console.log(" ")
-        
-    }*/
-    //console.log("--------Iteration : " + iter + "------")
+    console.log("--------Iteration : " + iter + "------");
+    //console.log(data.toString("utf-8"));
+
+    // Splits data on \n
     var d = data.toString("utf-8").split("\n");
-     
+
     // Removes last object in array, as it's an \n
     d.pop();
 
@@ -70,6 +70,8 @@ client.on('data', function(data) {
     {
         GameState.Update(JSON.parse(d[i]));
     }
+
+    console.log("--------------------------------------\n");
 });
 
 client.on('close', function(error) {
@@ -77,16 +79,14 @@ client.on('close', function(error) {
     {
         console.log("Unexpected disconnect");
     } else {
-        client.destroy();
         console.log("Disconnected. Trying reconnect in 1 second");
-
-        client.destroy();
 
         // Try to reconnect once in 1 second
         setTimeout(function()
         {
             Connect();
         } , 1000);
+        client.destroy();
     }
 });
 

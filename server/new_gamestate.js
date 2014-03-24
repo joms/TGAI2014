@@ -20,23 +20,19 @@ function gamestate(socket)
 gamestate.prototype.Update = function(data)
 {
     if (data.type == "status update") {
-        
-        for (var i = 0; i < data.players.length; i++) {
-            console.log(i + " " + data.players[i])
-        }
-        
         this.map = parser.ParseMap(data.map, this.fear);
         this.bombs = data.bombs;
         this.players = data.players;
         this.me.x = data.x;
         this.me.y = data.y;
         
-        var r = Math.floor(Math.random()*data.players.length)
+        var r = Math.floor(Math.random()*data.players.length);
         this.target = [this.players[r].x, this.players[r].y];
-        console.log("target player " + r)
+        console.log("target player " + r);
 
 
         console.log(this.fear);
+        console.log(this.bombs);
 
 
         if (this.bombs.length > 0)
@@ -47,8 +43,14 @@ gamestate.prototype.Update = function(data)
                 console.log("UNSAFE");
                 this.fear = true;
                 this.map = parser.ParseMap(data.map, this.fear);
-                var t = this.SquareSearch(this.me);
-                console.log(t);
+                var rad = 1;
+                var t = [];
+                while (t.length < 1)
+                {
+                    t = this.SquareSearch(this.me, r);
+                    r++;
+                }
+
                 this.target = [t[0].x, t[0].y];
             } else {
                 console.log("SAFE");
@@ -77,47 +79,48 @@ gamestate.prototype.Update = function(data)
             var dontmove = false          
             
             if (this.SafeSpot(this.me.x, this.me.y) == true) {
-                console.log ("-----")
-                console.log (n.move(0))
-                console.log ("-----")
+                console.log ("-----");
+                console.log (n.move(0));
+                console.log ("-----");
 
                if (n.move(0) == "UP\n") {
                     if (this.SafeSpot(this.me.x, this.me.y - 1) == false) {
-                        dontmove = true
+                        dontmove = true;
                     }
                 }
                 if (n.move(0) == "DOWN\n") {
                     if (this.SafeSpot(this.me.x, this.me.y + 1) == false) {
-                        dontmove = true
+                        dontmove = true;
                     }
                 }
                 if (n.move(0) == "RIGHT\n") {
                     if (this.SafeSpot(this.me.x + 1, this.me.y) == false) {
-                        dontmove = true
+                        dontmove = true;
                     }
                 }
                 if (n.move(0) == "LEFT\n") {
                     if (this.SafeSpot(this.me.x-1, this.me.y) == false) {
-                        dontmove = true
+                        dontmove = true;
                     }
                 }
            }
             if (dontmove == false) {
             this.Write(n.move(0));}
             else {
-                console.log("not moving")
+                console.log("not moving");
             }
             if (n.NextTile(0) == "ROCK")
+            {
                 this.Write("BOMB\n");
-
+            }
         }
 
     } else if (data.type == "end round") {
 
     } else if (data.type == "dead") {
-        console.log ("this bot is apparently dead")
-        var deadlist = ["but.. whyy?", "MORRADI ER FEIT!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"]
-        var i = Math.floor(Math.random()*deadlist.length)
+        console.log ("this bot is apparently dead");
+        var deadlist = ["but.. whyy?", "MORRADI ER FEIT!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"];
+        var i = Math.floor(Math.random()*deadlist.length);
         this.Write("SAY " + deadlist[i] + "\n");
         this.fear = false;
     }
@@ -167,43 +170,38 @@ gamestate.prototype.CanWalkThere = function(x,y)
     }
 }
 
-gamestate.prototype.SquareSearch = function(origo)
+gamestate.prototype.SquareSearch = function(origo, r)
 {
     var distArr = [];
-    var r = 1;
     console.log("In SquareSearch")
 
     // Prevent search from going outside map
-    var start = {x: origo.x - r, y: origo.y - r}
-    var stop = {x: origo.x + r, y: origo.y + r}
+    var start = {x: origo.x - r, y: origo.y - r};
+    var stop = {x: origo.x + r, y: origo.y + r};
     if (start.x < 0) {start.x = 0;}
     if (start.y < 0) {start.y = 0;}
     if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
     if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
 
-    while (distArr < 1)
+    for (var x = start.x; x <= stop.x; x++)
     {
-        for (var x = start.x; x <= stop.x; x++)
+        for (var y = start.y ; y <= stop.y; y++)
         {
-            for (var y = start.y ; y <= stop.y; y++)
+
+            // Is this a safe spot?
+            if (this.SafeSpot(x, y) == true)
             {
-
-                // Is this a safe spot?
-                if (this.SafeSpot(x, y) == true)
+                if (this.map[y][x] == 1)
                 {
-                    if (this.map[y][x] == 1)
+                    if (this.CanWalkThere(x, y) == true)
                     {
-                        if (this.CanWalkThere(x, y) == true)
-                        {
-                            var d = lineDistance({x: origo.x, y: origo.y}, {x: x, y: y})
+                        var d = lineDistance({x: origo.x, y: origo.y}, {x: x, y: y});
 
-                            distArr.push({x: x, y: y, d: d});
-                        }
+                        distArr.push({x: x, y: y, d: d});
                     }
                 }
             }
         }
-        r++;
     }
 
     console.log(this.map);
