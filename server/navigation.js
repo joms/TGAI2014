@@ -12,51 +12,53 @@ function navigator(path, map)
     ];
 }
 
+/**
+ * Calculates the direction of a given move
+ */
 navigator.prototype.move = function(num)
 {
     var p = this.path[num];
-/*    console.log (num)
-    console.log("X  Y");
-    console.log(p.parent.y +", "+p.parent.x); // Seems like x and y needs på be flipped ... yes, it hurts
-    console.log(p.y +", "+p.x);*/
 
-    var m;
+    var move;
 
-    if (p.y == p.parent.y)
+    if (p.y == p.parent.y) // Vertical move
     {
-        //console.log("Vertical move");
-        if (p.x - 1 == p.parent.x) // Vertical move
+        if (p.x - 1 == p.parent.x)
         {
-            m = 2; // Down
+            move = 2; // Down
         } else {
-            m = 3; // Up
+            move = 3; // Up
         }
-    } else {
-        //console.log("Horizontal move");
-        if (p.y - 1 == p.parent.y) // Horizontal move
+    } else { // Horizontal move
+        if (p.y - 1 == p.parent.y)
         {
-            m = 0; // right
+            move = 0; // right
         } else {
-            m = 1; // left
+            move = 1; // left
         }
     }
 
-    this.update(p.x, p.y, num + 10);
-    return this.moves[m];
+    return this.moves[move];
 }
 
+/**
+ * Gives you a random direction to move in
+ */
 navigator.prototype.Random = function()
 {
     return this.moves[Math.floor(Math.random()* 4)];
 }
 
+/**
+ * Returns what the next tile is
+ */
 navigator.prototype.NextTile = function(num)
 {
     var p = this.path[num];
     var m = this.map[p.x][p.y];
     switch(m)
     {
-        case 9:
+        case 2:
             return "ROCK";
         case 1:
             return "GRASS";
@@ -67,6 +69,10 @@ navigator.prototype.NextTile = function(num)
     }
 }
 
+/**
+ * Gives you the opposite direction of a move. Useful if you have to turn
+ * around to where you came from
+ */
 navigator.prototype.Opposite = function(move)
 {
     var moves = [
@@ -89,6 +95,9 @@ navigator.prototype.Opposite = function(move)
     }
 }
 
+/**
+ * Sets a coordinate in the map to whatever you feel like
+ */
 navigator.prototype.update = function(x, y, i)
 {
     this.map[x][y] = i;

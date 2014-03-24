@@ -1,7 +1,7 @@
 var net = require('net');
-var GameStateHandler = require('./gamestate.js');
-
-var HOST = '127.0.0.1';
+var GameStateHandler = require('./new_gamestate.js');
+var iter = 0 
+var HOST = 'localhost';
 var PORT = 54321;
 var client = new net.Socket();
 
@@ -32,6 +32,9 @@ var dummydata = {
 
 var GameState = new GameStateHandler(client);
 
+/**
+ * Connects to the server on given port and host
+ */
 function Connect()
 {
     client.connect(PORT, HOST, function() {
@@ -40,6 +43,7 @@ function Connect()
         client.write('NAME GIR\n');
     });
 }
+// Call connect when server.js starts
 Connect();
 
 client.on('error', function(data) {
@@ -48,35 +52,42 @@ client.on('error', function(data) {
 });
 
 client.on('data', function(data) {
+   
+    // Splits data on \n
+    iter++;
+/*    for (var i = 0; i < 15; i++){
+        console.log(" ")
+        
+    }*/
+    //console.log("--------Iteration : " + iter + "------")
     var d = data.toString("utf-8").split("\n");
+     
+    // Removes last object in array, as it's an \n
     d.pop();
+
+    // Send all data-string to Update()
     for (var i = 0; i < d.length; i++)
     {
         GameState.Update(JSON.parse(d[i]));
     }
-
-    //console.log(GameState.players);
-	//randommove()
 });
 
 client.on('close', function(error) {
     if (error == true)
     {
-        console.log("Unexpected disconnection");
+        console.log("Unexpected disconnect");
     } else {
         client.destroy();
         console.log("Disconnected. Trying reconnect in 1 second");
 
         client.destroy();
-        var recon = setTimeout(function(){
+
+        // Try to reconnect once in 1 second
+        setTimeout(function()
+        {
             Connect();
-            clearTimeout(recon);
-        }, 1000);
+        } , 1000);
     }
 });
 
-function randommove() {
-	var ran = Math.floor((Math.random()*5));
-	var move = ["UP","DOWN","LEFT","RIGHT","BOMB"];
-	client.write(move[ran]);
-}
+
