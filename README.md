@@ -1,5 +1,12 @@
 The Gathering Artificial Intelligence 2014
 ======
+
+#### Versions
+
+- Rev 1: 378fb8d3f4ea021947be8e3b3a4acfdd7e95aeae
+
+---
+
 ####Team (need to find a teamname)'s bot for The Gathering 2014 AI Programming compo   
 
 Will probably be written in js and run in browser. This makes it able to run extensive and intuitive debugging. JS should be the language wich is the most common when comparing our experience in programming. This is of course open for discussion.
