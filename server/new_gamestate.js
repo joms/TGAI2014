@@ -21,6 +21,47 @@ function gamestate(socket)
 /**
  * Receive data from server, and start doing stuff
  */
+
+gamestate.prototype.SquareSearch_new = function(origo, r)
+{
+    var distArr = [];
+    console.log("In SquareSearch new")
+
+    // Prevent search from going outside map
+    var start = {x: origo.x - r, y: origo.y - r};
+    var stop = {x: origo.x + r, y: origo.y + r};
+    if (start.x < 0) {start.x = 0;}
+    if (start.y < 0) {start.y = 0;}
+    if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
+    if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
+
+    for (var x = start.x; x <= stop.x; x++)
+    {
+        for (var y = start.y ; y <= stop.y; y++)
+        {
+            
+            // Is this a safe spot?
+            if (this.SafeSpot(x, y) == true)
+            {
+                if (this.map[y][x] == 1)
+                {
+                    
+                    distArr.push ({x:x, y:y})
+                }
+            }
+        }
+    }
+
+    console.log(distArr);
+
+   
+
+    return distArr;
+}
+
+
+
+
 gamestate.prototype.Update = function(data)
 {
     if (data.type == "status update") {
@@ -52,13 +93,30 @@ gamestate.prototype.Update = function(data)
                 console.log("UNSAFE");
                 this.fear = true;
                 this.map = parser.ParseMap(data.map, this.fear);
-                var rad = 1;
+                
+                for (var i = 0; i < this.players.length; i++){ var p = this.players[i]; this.map[p.y][p.x] = 0; }
+
+                var rad = 10;
                 var t = [];
-                while (t.length < 1)
-                {
-                    t = this.SquareSearch(this.me, r);
-                    r++;
+
+               // while (t.length < 1)
+               // {
+               //     t = this.SquareSearch(this.me, rad);
+               //     rad++;
+               // }
+                
+                //find all safe spots within theoretical walking distance before bomb goes off
+                t = this.SquareSearch_new(this.me,rad);
+
+                      console.log("safe spots -------------")
+                      console.log(t)
+                      console.log("------------------------")
+
+                for (var i = 0; i < t.length; i++){
+                 //do an a* on all safespots and determine the closest one   
                 }
+
+
 
                 this.target = [t[0].x, t[0].y];
             } else {
@@ -220,6 +278,8 @@ gamestate.prototype.SquareSearch = function(origo, r)
 
     return distArr;
 }
+
+
 
 /**
  * Check if a coordinate can be hit by a bomb
