@@ -108,18 +108,36 @@ gamestate.prototype.Update = function(data)
                 //find all safe spots within theoretical walking distance before bomb goes off
                 t = this.SquareSearch_new(this.me,rad);
 
-                      console.log("safe spots -------------")
-                      console.log(t)
-                      console.log("------------------------")
-
-                for (var i = 0; i < t.length; i++){
-                 //do an a* on all safespots and determine the closest one   
+                console.log("safe spots -------------")
+                console.log("found " + t.length)
+                console.log("------------------------")
+                
+                var arrays = []
+                var lastresult = []
+                var tgraph = new Graph(this.map);
+                var start = tgraph.nodes[this.me.y][this.me.x];
+                
+                
+                if (t.length>0) {
+                
+                    for (var i = 0; i < t.length; i++){
+                     //do an a* on all safespots and determine the closest one   
+                        var end = tgraph.nodes[t[i].y][t[i].x]
+                        var result = astar.search(tgraph.nodes, start, end);
+                        if (lastresult.length > 0) {
+                            if (result.length < lastresult.length) {
+                                this.result = i 
+                            } 
+                       
+                        }
+                     lastresult = result
+                    }
+                    
+                    this.target = [t[this.result].x, t[this.result].y];
                 }
+            } 
 
-
-
-                this.target = [t[0].x, t[0].y];
-            } else {
+            else {
                 console.log("SAFE");
                 console.log(this.me);
                 console.log(this.bombs);
