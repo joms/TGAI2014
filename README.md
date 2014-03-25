@@ -3,7 +3,7 @@ The Gathering Artificial Intelligence 2014
 
 #### Versions
 
-- Rev 1: [378fb8d3f4ea021947be8e3b3a4acfdd7e95aeae](https://github.com/joms/TGAI2014/commit/378fb8d3f4ea021947be8e3b3a4acfdd7e95aeae)
+- [Rev 1](https://github.com/joms/TGAI2014/releases/tag/1.0)
 
 ---
 
