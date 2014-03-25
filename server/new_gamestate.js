@@ -246,12 +246,29 @@ gamestate.prototype.SafeSpot = function(x,y)
     return safe;
 }
 
-gamestate.prototype.CanExit = function(x, y, target)
+gamestate.prototype.CanExit = function(from, to)
 {
     var m = this.map;
 
+    for (var i = 0; i < this.bombs.length; i++)
+    {
+        var b = this.bombs[i];
 
+        m[b.y][b.x] = 0;
+    }
 
+    var g = new Graph(m);
+    var start = g.nodes[from[1]][from[0]];
+    var end = g.nodes[to[1]][to[0]];
+
+    var r = astar.search(g.nodes, start, end);
+
+    if (r.length == 0)
+    {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /**
