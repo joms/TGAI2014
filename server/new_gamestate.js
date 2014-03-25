@@ -117,23 +117,27 @@ gamestate.prototype.Update = function(data)
                 var tgraph = new Graph(this.map);
                 var start = tgraph.nodes[this.me.y][this.me.x];
                 
-                
+                //check if there is any safespots present
                 if (t.length>0) {
-                
-                    for (var i = 0; i < t.length; i++){
                      //do an a* on all safespots and determine the closest one   
+                    for (var i = 0; i < t.length; i++){
                         var end = tgraph.nodes[t[i].y][t[i].x]
                         var result = astar.search(tgraph.nodes, start, end);
+                        
                         if (lastresult.length > 0) {
+                            //check if the result is smaller than the last one..
                             if (result.length < lastresult.length) {
+                                //..and save the index of the smallest list
                                 this.result = i 
                             } 
-                       
                         }
-                     lastresult = result
+                    lastresult = result
                     }
-                    
-                    this.target = [t[this.result].x, t[this.result].y];
+                //use the index of the smallest list to determine the move 
+                this.target = [t[this.result].x, t[this.result].y];
+                }
+                else {
+                    //fuck if i know. die?
                 }
             } 
 
