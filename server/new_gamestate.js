@@ -12,6 +12,10 @@ function gamestate(socket)
     this.me = {x: 0, x: 0};
     this.target = [];
     this.fear = false;
+
+    this.insults = ["Piggy!", "Waffles?", "AND I'M... AAAH-ahah... I dunno.", "I love this show!", "Tell me a story about giant pigs!", "I'm gonna sing the Doom Song now.", "Awww... I wanted to explode.",
+    "Somebody needs a hug!", "..MONKEY!", "I made mashed po-ta-toes!", "I miss my cupcake.", "Your head smells like a puppy!", "The pig... COMMANDS ME!", "Hi floor! Make me a sandwich!", "Aww, it likes me.", "TACOOOS!!!"];
+
 }
 
 /**
