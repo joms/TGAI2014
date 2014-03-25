@@ -246,7 +246,33 @@ gamestate.prototype.SafeSpot = function(x,y)
     return safe;
 }
 
-gamestate.prototype.CanExit = function(from, to)
+gamestate.prototype.checkForEnemiesInRadius = function()
+{
+//    console.log("in SafeSpot")
+
+    var boom = false;
+    for (var i = 0; i < this.players.length; i++)
+    {
+        var x = this.players[i].x
+        var y = this.players[i].y
+    
+    
+        var b = this.me;
+
+        if (x == b.x && b.y -2 <= y && b.y +2 >= y)
+        {
+            boom = true;
+        }
+
+        if (y == b.y && b.x -2 <= x && b.x +2 >= x)
+        {
+            boom = true;
+        }
+    }
+    return boom;
+}
+
+gamestate.prototype.CanExit = function(x, y, target)
 {
     var m = this.map;
 
