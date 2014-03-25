@@ -85,8 +85,8 @@ gamestate.prototype.Update = function(data)
         var n = new Navigator(result, this.map);
         if (n.path.length != 0)
         {
-            var dontmove = false          
-            
+            var dontmove = false;
+
             if (this.SafeSpot(this.me.x, this.me.y) == true) {
                 console.log ("-----");
                 console.log (n.move(0));
@@ -142,8 +142,7 @@ gamestate.prototype.WeightBombs = function()
         var b = this.bombs[i];
         this.map[b.y][b.x] = 0;
 
-        if (b.state <= 3)
-        {
+
             var start = {x: b.x - 2, y: b.y - 2};
             var stop = {x: b.x + 2, y: b.y + 2};
             if (start.x < 0) {start.x = 0;}
@@ -159,7 +158,7 @@ gamestate.prototype.WeightBombs = function()
             {
                 this.map[y][b.x] = 0;
             }
-        }
+
     }
 }
 
@@ -245,6 +244,14 @@ gamestate.prototype.SafeSpot = function(x,y)
         }
     }
     return safe;
+}
+
+gamestate.prototype.CanExit = function(x, y, target)
+{
+    var m = this.map;
+
+
+
 }
 
 /**
