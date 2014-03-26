@@ -246,7 +246,7 @@ gamestate.prototype.Update = function(data)
 
     } else if (data.type == "dead") {
         console.log ("this bot is apparently dead");
-        var deadlist = ["but.. whyy?\n", "MORRADI ER FEIT!!\n", "Next time, mr bond!\n", "dafuq?\n", "Your mom!\n", "My plan has failed!"];
+        var deadlist = ["but.. whyy?\n", "MORRADI ER FEIT!!\n", "Next time, mr bond!\n", "dafuq?\n", "Your mom!\n", "My plan has failed!\n"];
         var i = Math.floor(Math.random()*deadlist.length);
         this.Write("SAY " + deadlist[i] + "\n");
         this.fear = false;
