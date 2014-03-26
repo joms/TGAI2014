@@ -276,25 +276,22 @@ gamestate.prototype.SafeSpot = function(x,y)
     return safe;
 }
 
-gamestate.prototype.checkForEnemiesInRadius = function()
+gamestate.prototype.checkForEnemiesInRadius = function(rad)
 {
-//    console.log("in SafeSpot")
-
     var boom = false;
     for (var i = 0; i < this.players.length; i++)
     {
-        var x = this.players[i].x
-        var y = this.players[i].y
+        var p = this.players[i];
 
 
         var b = this.me;
 
-        if (x == b.x && b.y -2 <= y && b.y +2 >= y)
+        if (p.x == b.x && b.y -rad <= p.y && b.y +rad >= p.y)
         {
             boom = true;
         }
 
-        if (y == b.y && b.x -2 <= x && b.x +2 >= x)
+        if (p.y == b.y && b.x -rad <= p.x && b.x +rad >= p.x)
         {
             boom = true;
         }
