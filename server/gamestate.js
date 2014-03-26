@@ -1,11 +1,13 @@
 var parser = require('./parser.js');
 require('./astar.js');
 var Navigator = require('./navigation.js');
-
+var randomcount = 20 
+var r = 0 
 function gamestate(socket)
 {
+    
     this.socket = socket;
-
+    this.name = "Determined Gir"
     this.map;
     this.bombs = [];
     this.players = [];
@@ -51,9 +53,7 @@ gamestate.prototype.SquareSearch = function(origo, r)
             }
         }
     }
-
-    console.log(distArr);
-
+   
     return distArr;
 }
 
@@ -89,7 +89,7 @@ gamestate.prototype.playerMoveSearch = function(origo)
                 }
     }
 
-    console.log(distArr);
+   
 
     return distArr;
 }
@@ -104,13 +104,17 @@ gamestate.prototype.Update = function(data)
         this.me.x = data.x;
         this.me.y = data.y;
 
-        var r = Math.floor(Math.random()*data.players.length);
+       
+        randomcount++
+        if (randomcount > 20) {
+            r = Math.floor(Math.random()*data.players.length);
+            randomcount = 0;
+        }
+
+        if (r > data.players.length-1) { r = data.players.length-1}
         this.target = [this.players[r].x, this.players[r].y];
         console.log("target player " + r);
 
-
-        console.log(this.fear);
-        console.log(this.bombs);
 
         for (var i = 0; i < this.players.length; i++)
         {
@@ -125,7 +129,7 @@ gamestate.prototype.Update = function(data)
             if (this.bombs.length > this.players.length + 1)
             {
                 console.log("ARMAGEDDON!!!");
-
+                this.target = [this.me.x, this.me.y];
                 //vi burde gjøre armageddon-mode til true frem til end round slik at den ikke hopper mellom
                 //begge states hele tiden -Stian 
 
@@ -144,7 +148,7 @@ gamestate.prototype.Update = function(data)
                 // Gå dit
                 //eventuelt sette target til seg selv om det er safe, og bare la passive do(d)ge mode gjøre jobben sin best mulig -Stian
 
-            } else {
+            } //else {
                 if (this.SafeSpot(this.me.x, this.me.y) == false)
                 {
                     console.log("UNSAFE");
@@ -154,7 +158,7 @@ gamestate.prototype.Update = function(data)
                     for (var i = 0; i < this.players.length; i++){ var p = this.players[i]; this.map[p.y][p.x] = 0; }
 
                     //find all safe spots within theoretical walking distance before bomb goes off
-                    var t = this.SquareSearch(this.me, 5);
+                    var t = this.SquareSearch(this.me, 10);
 
                     console.log("safe spots -------------");
                     console.log("found " + t.length);
@@ -222,7 +226,7 @@ gamestate.prototype.Update = function(data)
                         }
 
                         //use the index of the smallest list to determine the move
-                        console.log(arrays);
+                       
                         console.log("choosing " + this.result);
                         this.target = [t[this.result].x, t[this.result].y];
                         this.result = 0;
@@ -239,7 +243,7 @@ gamestate.prototype.Update = function(data)
                     console.log(data.bombs);
                     this.fear = false;
                 }
-            }
+            //}
         }
 
         // Define a new a* graph
@@ -259,15 +263,11 @@ gamestate.prototype.Update = function(data)
             var dontmove = false;
 
             if (this.SafeSpot(this.me.x, this.me.y) == true) {
-                console.log ("-----");
-                console.log (n.move(0));
-                console.log ("-----");
-
+               
                 if (n.move(0) == "UP\n") {
                     if (this.SafeSpot(this.me.x, this.me.y - 1) == false) {
                         dontmove = true;
                     }
-                    console.log(result[1]);
                 }
                 if (n.move(0) == "DOWN\n") {
                     if (this.SafeSpot(this.me.x, this.me.y + 1) == false) {
