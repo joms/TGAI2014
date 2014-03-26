@@ -57,6 +57,44 @@ gamestate.prototype.SquareSearch = function(origo, r)
     return distArr;
 }
 
+gamestate.prototype.playerMoveSearch = function(origo)
+{
+    var distArr = [];
+    console.log("In PlayerMoveSearch")
+
+    // Prevent search from going outside map
+    var start = {x: origo.x - 1, y: origo.y - 1};
+    var stop = {x: origo.x + 1, y: origo.y + 1};
+    if (start.x < 0) {start.x = 0;}
+    if (start.y < 0) {start.y = 0;}
+    if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
+    if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
+
+    var list = []
+    list.x = [0,-1,0,1,0]
+    list.y = [-1,0,0,0,1]
+
+    
+    for (var i = 0; i < 4;i++)
+            // Is this a safe spot?
+            x = origo.x + list.x[i];
+            y = origo.y + list.y[i];
+
+            if (this.SafeSpot(x, y) == true)
+            {
+                if (this.map[y][x] == 1)
+                {
+
+                    distArr.push ({x:x, y:y})
+                }
+    }
+
+    console.log(distArr);
+
+    return distArr;
+}
+
+
 gamestate.prototype.Update = function(data)
 {
     if (data.type == "status update") {
@@ -88,9 +126,12 @@ gamestate.prototype.Update = function(data)
             {
                 console.log("ARMAGEDDON!!!");
 
+                //vi burde gjøre armageddon-mode til true frem til end round slik at den ikke hopper mellom
+                //begge states hele tiden -Stian 
+
                 // Hvis nærmere enn 3 ruter til en person, gå i motsatt retning
 
-                // Start squaresearch så langt unna som mulig, dekrementer hvis ingen treff
+                // Start squaresearch så langt unna som mulig (men ikke i et hjørne -S), dekrementer hvis ingen treff
                 // Prøv helst å finne treff i retningen fra folk
                 // Hvor hardt kan vi eventuelt vekte folk?
                 // Max 75% av kartet kan være 0 f.eks?
@@ -101,6 +142,8 @@ gamestate.prototype.Update = function(data)
                 // Sjekk om man kan gå til treff lengst unna
 
                 // Gå dit
+                //eventuelt sette target til seg selv om det er safe, og bare la passive do(d)ge mode gjøre jobben sin best mulig -Stian
+
             } else {
                 if (this.SafeSpot(this.me.x, this.me.y) == false)
                 {
@@ -162,7 +205,7 @@ gamestate.prototype.Update = function(data)
                         {
                             if (arrays[i].l == arrays[0].l)
                             {
-                                mytarget[decisionindex] = this.SquareSearch(t[arrays[i].i],1);
+                                mytarget[decisionindex] = this.playerMoveSearch(t[arrays[i].i]);
                                 samelength.push({l:mytarget[decisionindex].length, i:arrays[i].i});
                                 decisionindex++;
                             }
@@ -377,6 +420,11 @@ gamestate.prototype.Write = function(input)
     console.log(input);
 }
 
+gamestate.prototype.write = function(input)
+{
+    this.socket.write(input);
+    console.log(input);
+}
 /**
  * Returns the distance from one {x: x, y: y} to another.
  */
