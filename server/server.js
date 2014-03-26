@@ -1,34 +1,9 @@
 var net = require('net');
-var GameStateHandler = require('./new_gamestate.js');
+var GameStateHandler = require('./gamestate.js');
 var iter = 0 
 var HOST = 'localhost';
 var PORT = 54321;
 var client = new net.Socket();
-
-/*------------------------------------------
-var dummydata = {
-    type: "status update",
-    players: [
-        { id: 1, x: 6, y: 6 }
-    ],
-    bombs: [
-    ],
-    x: 1,
-    y: 1,
-    height: 8,
-    width: 8,
-    map: [
-        "++++++++",
-        "+..####+",
-        "+.#####+",
-        "+######+",
-        "+######+",
-        "+#####.+",
-        "+####..+",
-        "++++++++"
-    ]
-};
-------------------------------------------*/
 
 var GameState = new GameStateHandler(client);
 
