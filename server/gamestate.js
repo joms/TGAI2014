@@ -13,8 +13,8 @@ function gamestate(socket)
     this.target = [];
     this.fear = false;
     this.result = 0
-    this.insults = ["Piggy!", "Waffles?", "AND I'M... AAAH-ahah... I dunno.", "I love this show!", "Tell me a story about giant pigs!", "I'm gonna sing the Doom Song now.", "Awww... I wanted to explode.",
-        "Somebody needs a hug!", "..MONKEY!", "I made mashed po-ta-toes!", "I miss my cupcake.", "Your head smells like a puppy!", "The pig... COMMANDS ME!", "Hi floor! Make me a sandwich!", "Aww, it likes me.", "TACOOOS!!!"];
+    this.insults = ["Piggy!\n", "Waffles?\n", "AND I'M... AAAH-ahah... I dunno.\n", "I love this show!\n", "Tell me a story about giant pigs!\n", "I'm gonna sing the Doom Song now.\n", "Awww... I wanted to explode.\n",
+        "Somebody needs a hug!\n", "..MONKEY!\n", "I made mashed po-ta-toes!\n", "I miss my cupcake.\n", "Your head smells like a puppy!\n", "The pig... COMMANDS ME!\n", "Hi floor! Make me a sandwich!\n", "Aww, it likes me.\n", "TACOOOS!!!\n"];
 
 }
 
@@ -204,7 +204,7 @@ gamestate.prototype.Update = function(data)
             if (dontmove == false) {
                 this.Write(n.move(0));}
             else {
-                console.log("not moving");
+                this.write(this.insults[Math.floor(Math.random() * this.insults.length)]);
             }
             if (n.NextTile(0) == "ROCK")
             {
@@ -216,7 +216,7 @@ gamestate.prototype.Update = function(data)
 
     } else if (data.type == "dead") {
         console.log ("this bot is apparently dead");
-        var deadlist = ["but.. whyy?", "MORRADI ER FEIT!!", "Next time, mr bond!", "dafuq?", "Your mom!", "My plan has failed!"];
+        var deadlist = ["but.. whyy?\n", "MORRADI ER FEIT!!\n", "Next time, mr bond!\n", "dafuq?\n", "Your mom!\n", "My plan has failed!"];
         var i = Math.floor(Math.random()*deadlist.length);
         this.Write("SAY " + deadlist[i] + "\n");
         this.fear = false;
