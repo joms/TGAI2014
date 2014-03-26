@@ -123,7 +123,11 @@ gamestate.prototype.Update = function(data)
                             arrays.push({l: result.length, i: i})
                         }
 
-                        var p = 1000}
+                    }
+
+                    //find lowest length
+                    var p = 1000
+
                     for (var i = 0; i<arrays.length; i++) {
 
                         if (arrays[i].l < p) {
@@ -133,7 +137,33 @@ gamestate.prototype.Update = function(data)
 
                     }
 
-                    // arrays.sort(function(a, b) {return a[1] - b[1]});
+                    //sort the array, lowest l first
+                    arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
+
+                    var samelength = []
+                    var mytarget = []
+                    var decisionindex = 0
+
+                    //figure out if any of the indexes have the same length and then do a squaresearch and save them in samelength
+                    for (var i = 0; i<arrays.length; i++){
+                        if (arrays[i].l == arrays[0].l){
+                            mytarget[decisionindex] = this.SquareSearch(t[arrays[i].i],1)
+                            samelength.push({l:mytarget[decisionindex].length, i:arrays[i].i})
+                            decisionindex++
+                        }
+                    }
+
+                    //sort the list, highest l first
+                    samelength.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
+                    samelength.reverse()
+
+                    //
+                    try {
+                        this.result = samelength[0].i
+                    } catch (err) {
+                        this.write("TACOOOS!!!111!11one\n");
+                    }
+
                     //use the index of the smallest list to determine the move
                     console.log(arrays)
                     console.log("choosing " + this.result)
@@ -276,22 +306,25 @@ gamestate.prototype.SafeSpot = function(x,y)
     return safe;
 }
 
-gamestate.prototype.checkForEnemiesInRadius = function(rad)
+gamestate.prototype.checkForEnemiesInRadius = function()
 {
+//    console.log("in SafeSpot")
+
     var boom = false;
     for (var i = 0; i < this.players.length; i++)
     {
-        var p = this.players[i];
+        var x = this.players[i].x
+        var y = this.players[i].y
 
 
         var b = this.me;
 
-        if (p.x == b.x && b.y -rad <= p.y && b.y +rad >= p.y)
+        if (x == b.x && b.y -2 <= y && b.y +2 >= y)
         {
             boom = true;
         }
 
-        if (p.y == b.y && b.x -rad <= p.x && b.x +rad >= p.x)
+        if (y == b.y && b.x -2 <= x && b.x +2 >= x)
         {
             boom = true;
         }
