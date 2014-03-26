@@ -12,7 +12,7 @@ function gamestate(socket)
     this.me = {x: 0, x: 0};
     this.target = [];
     this.fear = false;
-
+    this.result = 0 
     this.insults = ["Piggy!", "Waffles?", "AND I'M... AAAH-ahah... I dunno.", "I love this show!", "Tell me a story about giant pigs!", "I'm gonna sing the Doom Song now.", "Awww... I wanted to explode.",
     "Somebody needs a hug!", "..MONKEY!", "I made mashed po-ta-toes!", "I miss my cupcake.", "Your head smells like a puppy!", "The pig... COMMANDS ME!", "Hi floor! Make me a sandwich!", "Aww, it likes me.", "TACOOOS!!!"];
 
@@ -96,7 +96,7 @@ gamestate.prototype.Update = function(data)
                 
                 for (var i = 0; i < this.players.length; i++){ var p = this.players[i]; this.map[p.y][p.x] = 0; }
 
-                var rad = 10;
+                var rad = 5;
                 var t = [];
 
                // while (t.length < 1)
@@ -111,35 +111,49 @@ gamestate.prototype.Update = function(data)
                 console.log("safe spots -------------")
                 console.log("found " + t.length)
                 console.log("------------------------")
-
-                var results = [];
-                var lastresult = [];
+                
+                var arrays = []
+                var lastresult = []
                 var tgraph = new Graph(this.map);
                 var start = tgraph.nodes[this.me.y][this.me.x];
-
-//                distArr.sort(function(a, b) {return a[2] - b[2]});
-
+                
                 //check if there is any safespots present
                 if (t.length>0) {
-                    //do an a* on all safespots and determine the closest one
-                    for (var i = 0; i < t.length; i++)
-                    {
-                        var end = tgraph.nodes[t[i].y][t[i].x];
+                     //do an a* on all safespots and determine the closest one   
+                    for (var i = 0; i < t.length; i++){
+                        var end = tgraph.nodes[t[i].y][t[i].x]
                         var result = astar.search(tgraph.nodes, start, end);
-                        if (result.length > 0)
-                        {
-                            results.push({x: result[0].x, y: result[0].y, l: result.length});
+                        
+                        if (result.length > 0) {
+                            arrays.push({l: result.length, i: i})
                         }
+                                
+                    var p = 1000}
+                for (var i = 0; i<arrays.length; i++) {
+
+                    if (arrays[i].l < p) {
+                        this.result = arrays[i].i
+                        p = arrays[i].l
                     }
-                    //use the index of the smallest list to determine the move
-                    if (results.length > 0)
-                    {
-                        results.sort(function(a, b) {return a[2] - b[2]});
-                        this.target = [results[0].y, results[0].x];
-                    }
+                    
+                }
+                
+
+                
+
+
+               // arrays.sort(function(a, b) {return a[1] - b[1]});
+                //use the index of the smallest list to determine the move 
+                console.log(arrays)
+                console.log("choosing " + this.result)
+                var arrays = []
+                var lastresult = []
+                var result = []
+                this.target = [t[this.result].x, t[this.result].y];
+                this.result = 0
                 }
                 else {
-                    //fuck if i know. die?
+                    this.Write("BOMB\n");
                 }
             } 
 
@@ -155,7 +169,9 @@ gamestate.prototype.Update = function(data)
         // Define a new a* graph
         var graph = new Graph(this.map);
         var start = graph.nodes[this.me.y][this.me.x];
-
+        console.log("setting target -------------")
+        console.log(this.target)
+        console.log("----------------------------")
         var end  = graph.nodes[this.target[1]][this.target[0]];
         var result = astar.search(graph.nodes, start, end);
 
@@ -165,6 +181,7 @@ gamestate.prototype.Update = function(data)
 
         // Find what the next step is called
         var n = new Navigator(result, this.map);
+        
         if (n.path.length != 0)
         {
             var dontmove = false;
@@ -195,8 +212,11 @@ gamestate.prototype.Update = function(data)
                     }
                 }
            }
+           
             if (dontmove == false) {
+        
             this.Write(n.move(0));}
+            
             else {
                 console.log("not moving");
             }
