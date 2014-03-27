@@ -1,0 +1,9 @@
+
+todo:
+
+vekte hver 1'er tile på mappet etter antall exit-nodes og lagre i et array, bruke dette arrayet som en modifikator for kartet. 
+færre utganger vektes hardere. da kan vi også sjekke om andre spillere står på tiles med bare en eller to utganger og effektivt sperre dem inne.
+
+
+
+
