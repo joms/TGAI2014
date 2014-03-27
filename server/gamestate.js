@@ -201,8 +201,8 @@ gamestate.prototype.Update = function(data)
 
         var nw = [];
         nw = this.nodeWeights();
-        console.log("nodeweights------------------")
-        console.log(nw)
+        //console.log("nodeweights------------------")
+        //console.log(nw)
 
         // Define a new a* graph
         var graph = new Graph(this.map);
@@ -313,7 +313,7 @@ gamestate.prototype.nodeWeights = function(lol)
                 array.push ({x: x, y: y, n: numnodes.length})
             } 
             else {
-                console.log("not a 1")
+               //console.log("not a 1")
                 array.push({x: x, y: y, n: 0})
             }
 
@@ -326,8 +326,8 @@ gamestate.prototype.nodeWeights = function(lol)
 gamestate.prototype.playerMoveSearch = function(origo)
 {
     var distArr = [];
-    console.log("In PlayerMoveSearch")
-    console.log(origo)
+    //console.log("In PlayerMoveSearch")
+    //console.log(origo)
     // Prevent search from going outside map
     
 
@@ -340,14 +340,14 @@ gamestate.prototype.playerMoveSearch = function(origo)
         // Is this a safe spot?
         x = origo.x + list.x[i];
         y = origo.y + list.y[i];
-        console.log("checking " + x + " " + y)
+        //console.log("checking " + x + " " + y)
     //if (this.SafeFromBombs(x, y) == true)
     //{
         
         try{ 
             if (this.map[y][x] == 1)
         {
-            console.log ("got an exit")
+          //  console.log ("got an exit")
             distArr.push ({x:x, y:y})
         }
         
