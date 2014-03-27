@@ -41,7 +41,7 @@ gamestate.prototype.Update = function(data)
         }
 
         if (r > data.players.length-1) { r = data.players.length-1}
-        this.target = [this.players[r].x, this.players[r].y];
+        this.target = [this.players[0].x, this.players[0].y];
         console.log("target player " + r);
 
 
@@ -208,6 +208,11 @@ gamestate.prototype.Update = function(data)
             }
         }
 
+        var nw = [];
+        nw = this.nodeWeights();
+        console.log("nodeweights------------------")
+        console.log(nw)
+
         // Define a new a* graph
         var graph = new Graph(this.map);
         var start = graph.nodes[this.me.y][this.me.x];
@@ -303,36 +308,60 @@ gamestate.prototype.SquareSearch = function(origo, r)
     return distArr;
 }
 
+gamestate.prototype.nodeWeights = function(lol) 
+{
+    var array = []
+    var numnodes 
+    for (var x = 0; x < this.map[0].length; x++) {
+        for (var y = 0; y < this.map.length; y++){
+
+            if (this.map[y][x] == 1){
+                
+                numnodes = this.playerMoveSearch({x: x, y: y});
+                
+                array.push ({x: x, y: y, n: numnodes.length})
+            } 
+            else {
+                console.log("not a 1")
+                array.push({x: x, y: y, n: 0})
+            }
+
+
+        }
+    }
+    return array;
+}
+
 gamestate.prototype.playerMoveSearch = function(origo)
 {
     var distArr = [];
     console.log("In PlayerMoveSearch")
-
+    console.log(origo)
     // Prevent search from going outside map
-    var start = {x: origo.x - 1, y: origo.y - 1};
-    var stop = {x: origo.x + 1, y: origo.y + 1};
-    if (start.x < 0) {start.x = 0;}
-    if (start.y < 0) {start.y = 0;}
-    if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
-    if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
+    
 
-    var list = []
-    list.x = [0,-1,0,1,0]
-    list.y = [-1,0,0,0,1]
+    var list = {x: [], y: []};
+    list.x = [0,-1,1,0]
+    list.y = [-1,0,0,1]
 
 
-    for (var i = 0; i < 4;i++)
+    for (var i = 0; i < list.x.length;i++) {
         // Is this a safe spot?
         x = origo.x + list.x[i];
-    y = origo.y + list.y[i];
-
-    if (this.SafeFromBombs(x, y) == true)
-    {
-        if (this.map[y][x] == 1)
+        y = origo.y + list.y[i];
+        console.log("checking " + x + " " + y)
+    //if (this.SafeFromBombs(x, y) == true)
+    //{
+        
+        try{ 
+            if (this.map[y][x] == 1)
         {
-
+            console.log ("got an exit")
             distArr.push ({x:x, y:y})
         }
+        
+        } catch (err) {console.log ("outside map")}
+
     }
 
 
