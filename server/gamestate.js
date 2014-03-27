@@ -40,7 +40,7 @@ gamestate.prototype.Update = function(data)
             randomcount = 0;
         }
 
-        if (r > data.players.length-1) { r = data.players.length-1}
+        if (r > data.players.length-1) { r = data.players.length-1 }
         this.target = [this.players[0].x, this.players[0].y];
         console.log("target player " + r);
 
@@ -60,18 +60,12 @@ gamestate.prototype.Update = function(data)
                 this.armageddon = true;
                 console.log("ARMAGEDDON!!!");
                 this.target = [this.me.x, this.me.y];
-                /** Fixed **/
-                //vi burde gjøre armageddon-mode til true frem til end round slik at den ikke hopper mellom
-                //begge states hele tiden -Stian 
 
-                // Hvis nærmere enn 3 ruter til en person, gå i motsatt retning
-                if (this.SafeFromPlayers(this.me.x, this.me.y, 3) == true)
+                if (this.SafeFromPlayers(this.me.x, this.me.y, 3) == false)
                 {
                     this.WeightPlayers(2);
-                    // Start squaresearch så langt unna som mulig (men ikke i et hjørne -S), dekrementer hvis ingen treff
-                    // Prøv helst å finne treff i retningen fra folk
 
-                    var t = this.SquareSearch(this.me, 3);
+                    var t = this.SquareSearch(this.me, 2);
 
                     if (t.length > 0)
                     {
@@ -92,28 +86,22 @@ gamestate.prototype.Update = function(data)
                             }
                         }
 
-                        results.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
+                        results.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; });
 
-                        this.target = [results[0].x, results[0].y];
+                        if (results.length > 0)
+                        {
+                            this.target = [results[0].x, results[0].y];
+                        } else {
+                            this.target = [this.me.x, this.me.y];
+                        }
 
                     } else {
                        this.target = [this.me.x, this.me.y];
                     }
 
-                    /** Prøver med å bare vekte selve spilleren som 0 **/
-                    // Hvor hardt kan vi eventuelt vekte folk?
-                    // Max 75% av kartet kan være 0 f.eks?
-
-                    /** Vekter bare selve spilleren som 0, resten blir vektet høyt - vi blir dermed aldri stuck **/
-                    // Her må også en algo for å se om man har blitt presset inn i et hjørne
-                    // kjøres. Hvis ja må det lettes på trykket så man kommer seg unna
-
                 } else {
                     this.target = [this.me.x, this.me.y];
                 }
-
-                /** Fixed **/
-                //eventuelt sette target til seg selv om det er safe, og bare la passive do(d)ge mode gjøre jobben sin best mulig -Stian
 
             } else {
                 if (this.SafeFromBombs(this.me.x, this.me.y) == false && this.armageddon == false)
@@ -183,13 +171,10 @@ gamestate.prototype.Update = function(data)
                         console.log("choosing " + this.result);
                         this.target = [t[this.result].x, t[this.result].y];
                         this.result = 0;
-                    }
-                    else {
+                    } else {
                         this.Write("BOMB\n");
                     }
-                }
-
-                else {
+                } else {
                     console.log("SAFE");
                     console.log(this.me);
                     console.log(this.bombs);
@@ -455,9 +440,9 @@ gamestate.prototype.SafeFromPlayers = function(x,y,r)
     {
         var p = this.players[i];
 
-        if (x <= p.x - r && x >= p.x + r)
+        if (x >= p.x - r && x <= p.x + r)
         {
-            if (y <= p.y - r && y >= p.y + r)
+            if (y >= p.y - r && y <= p.y + r)
             {
                 safe = false;
             }
