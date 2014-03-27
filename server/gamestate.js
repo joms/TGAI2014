@@ -83,7 +83,7 @@ gamestate.prototype.Update = function(data)
                         //do an a* on all safespots and determine the closest one
                         for (var i = 0; i < t.length; i++)
                         {
-                            var end = tgraph.nodes[t[i].y][t[i].x];
+                            var end = g.nodes[t[i].y][t[i].x];
                             var result = astar.search(g.nodes, start, end);
 
                             if (result.length > 0)
@@ -94,6 +94,10 @@ gamestate.prototype.Update = function(data)
 
                         results.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
 
+                        this.target = [results[0].x, results[0].y];
+
+                    } else {
+                       this.target = [this.me.x, this.me.y];
                     }
 
                     /** Prøver med å bare vekte selve spilleren som 0 **/
@@ -146,25 +150,12 @@ gamestate.prototype.Update = function(data)
                             }
                         }
 
-/*                        //find lowest length
-                        var p = 1000;
-
-                        for (var i = 0; i<arrays.length; i++)
-                        {
-
-                            if (arrays[i].l < p) {
-                                this.result = arrays[i].i;
-                                p = arrays[i].l;
-                            }
-
-                        }*/
-
                         //sort the array, lowest l first
                         arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
 
-                        var samelength = []
-                        var mytarget = []
-                        var decisionindex = 0
+                        var samelength = [];
+                        var mytarget = [];
+                        var decisionindex = 0;
 
                         //figure out if any of the indexes have the same length and then do a squaresearch and save them in samelength
                         for (var i = 0; i<arrays.length; i++)
