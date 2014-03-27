@@ -30,6 +30,7 @@ client.on('error', function(data) {
 });
 
 client.on('data', function(data) {
+    var hrstart = process.hrtime();
     iter++;
     console.log("--------Iteration : " + iter + "------");
     //console.log(data.toString("utf-8"));
@@ -46,6 +47,8 @@ client.on('data', function(data) {
         GameState.Update(JSON.parse(d[i]));
     }
 
+    var hrend = process.hrtime(hrstart);
+    console.info("Execution time: %ds %dms", hrend[0], hrend[1]/1000000);
     console.log("--------------------------------------\n");
 });
 
