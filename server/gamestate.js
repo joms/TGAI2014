@@ -46,7 +46,7 @@ gamestate.prototype.Update = function(data)
         }
 
         if (r > data.players.length-1) { r = data.players.length-1 }
-        this.target = [this.players[0].x, this.players[0].y];
+        this.target = [this.players[r].x, this.players[r].y];
         
 
         for (var i = 0; i < this.players.length; i++)
