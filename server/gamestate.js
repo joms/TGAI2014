@@ -65,8 +65,8 @@ gamestate.prototype.Update = function(data)
         if (this.bombs.length > 0)
         {
             this.WeightBombs();
-            var yo_mama = false
-            if ( yo_mama == true)//this.bombs.length > this.players.length + 1)
+            var yo_mama = true;
+            if ( yo_mama == true && this.bombs.length > this.players.length + 1)
             {   
 
                 //christ man, make a function :D this shit is unreadable :D
@@ -435,6 +435,8 @@ gamestate.prototype.WeightPlayers = function(r)
         {
             for (var y = start.y ; y <= stop.y; y++)
             {
+                this.map[y][x] = 0;
+                /*
                 if (x == p.x && y == p.y)
                 {
                     this.map[y][x] = 0;
@@ -447,6 +449,7 @@ gamestate.prototype.WeightPlayers = function(r)
                 {
                     this.map[y][x] = 5;
                 }
+                */
             }
         }
 
