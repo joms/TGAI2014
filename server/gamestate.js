@@ -66,134 +66,89 @@ gamestate.prototype.Update = function(data)
         {
             this.WeightBombs();
             var yo_mama = true;
-            if ( yo_mama == true && this.bombs.length > this.players.length + 1)
-            {   
-
-                //christ man, make a function :D this shit is unreadable :D
-                //also! rock and players are now weighted as 9, and not 2. nice to know :D
-                
+            if ((yo_mama == true && this.bombs.length > this.players.length + 1) | this.armageddon == true)
+            {
                 this.armageddon = true;
                 console.log("ARMAGEDDON!!!");
                 this.target = [this.me.x, this.me.y];
 
-                if (this.SafeFromPlayers(this.me.x, this.me.y, 3) == false)
+                this.WeightPlayers(1);
+            }
+
+            if (this.SafeFromBombs(this.me.x, this.me.y) == false)
+            {
+                //console.log("UNSAFE");
+                this.fear = true;
+                this.map = parser.ParseMap(data.map, this.fear);
+
+                for (var i = 0; i < this.players.length; i++){ var p = this.players[i]; this.map[p.y][p.x] = 0; }
+
+                //find all safe spots within theoretical walking distance before bomb goes off
+                var t = this.SquareSearch(this.me, 10);
+
+                // console.log("safe spots -------------");
+                // console.log("found " + t.length);
+                // console.log("------------------------");
+
+                var arrays = [];
+                var tgraph = new Graph(this.map);
+                var start = tgraph.nodes[this.me.y][this.me.x];
+
+                //check if there is any safespots present
+                if (t.length>0)
                 {
-                    this.WeightPlayers(2);
-
-                    var t = this.SquareSearch(this.me, 2);
-
-                    if (t.length > 0)
+                    //do an a* on all safespots and determine the closest one
+                    for (var i = 0; i < t.length; i++)
                     {
-                        var g = new Graph(this.map);
-                        var start = g.nodes[this.me.y][this.me.x];
+                        var end = tgraph.nodes[t[i].y][t[i].x];
+                        var result = astar.search(tgraph.nodes, start, end);
 
-                        var results = [];
-
-                        //do an a* on all safespots and determine the closest one
-                        for (var i = 0; i < t.length; i++)
+                        if (result.length > 0)
                         {
-                            var end = g.nodes[t[i].y][t[i].x];
-                            var result = astar.search(g.nodes, start, end);
-
-                            if (result.length > 0)
-                            {
-                                results.push({l: result.length, i: i});
-                            }
+                            arrays.push({l: result.length, i: i});
                         }
-
-                        results.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; });
-
-                        if (results.length > 0)
-                        {
-                            this.target = [results[0].x, results[0].y];
-                        } else {
-                            this.target = [this.me.x, this.me.y];
-                        }
-
-                    } else {
-                       this.target = [this.me.x, this.me.y];
                     }
 
-                } else {
-                    this.target = [this.me.x, this.me.y];
-                }
+                    //sort the array, lowest l first
+                    arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
 
+                    var samelength = [];
+                    var mytarget = [];
+                    var decisionindex = 0;
+
+                    //figure out if any of the indexes have the same length and then do a squaresearch and save them in samelength
+                    for (var i = 0; i<arrays.length; i++)
+                    {
+                        if (arrays[i].l == arrays[0].l)
+                        {
+                            mytarget[decisionindex] = this.playerMoveSearch(t[arrays[i].i]);
+                            samelength.push({l:mytarget[decisionindex].length, i:arrays[i].i});
+                            decisionindex++;
+                        }
+                    }
+
+                    //sort the list, highest l first
+                    samelength.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; });
+                    samelength.reverse();
+
+                    try {
+                        this.result = samelength[0].i;
+                    } catch (err) {
+                        this.Write("SAY TACOOOS!!!111!11one\n");
+                    }
+
+                    //use the index of the smallest list to determine the move
+
+                    // console.log("choosing " + this.result);
+                    this.target = [t[this.result].x, t[this.result].y];
+                    this.result = 0;
+                } else {
+                    this.Write("BOMB\n");
+                }
             } else {
-                if (this.SafeFromBombs(this.me.x, this.me.y) == false && this.armageddon == false)
-                {
-                    //console.log("UNSAFE");
-                    this.fear = true;
-                    this.map = parser.ParseMap(data.map, this.fear);
-
-                    for (var i = 0; i < this.players.length; i++){ var p = this.players[i]; this.map[p.y][p.x] = 0; }
-
-                    //find all safe spots within theoretical walking distance before bomb goes off
-                    var t = this.SquareSearch(this.me, 10);
-
-                   // console.log("safe spots -------------");
-                   // console.log("found " + t.length);
-                   // console.log("------------------------");
-
-                    var arrays = [];
-                    var tgraph = new Graph(this.map);
-                    var start = tgraph.nodes[this.me.y][this.me.x];
-
-                    //check if there is any safespots present
-                    if (t.length>0)
-                    {
-                        //do an a* on all safespots and determine the closest one
-                        for (var i = 0; i < t.length; i++)
-                        {
-                            var end = tgraph.nodes[t[i].y][t[i].x];
-                            var result = astar.search(tgraph.nodes, start, end);
-
-                            if (result.length > 0)
-                            {
-                                arrays.push({l: result.length, i: i});
-                            }
-                        }
-
-                        //sort the array, lowest l first
-                        arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
-
-                        var samelength = [];
-                        var mytarget = [];
-                        var decisionindex = 0;
-
-                        //figure out if any of the indexes have the same length and then do a squaresearch and save them in samelength
-                        for (var i = 0; i<arrays.length; i++)
-                        {
-                            if (arrays[i].l == arrays[0].l)
-                            {
-                                mytarget[decisionindex] = this.playerMoveSearch(t[arrays[i].i]);
-                                samelength.push({l:mytarget[decisionindex].length, i:arrays[i].i});
-                                decisionindex++;
-                            }
-                        }
-
-                        //sort the list, highest l first
-                        samelength.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; });
-                        samelength.reverse();
-
-                        try {
-                            this.result = samelength[0].i;
-                        } catch (err) {
-                            this.Write("SAY TACOOOS!!!111!11one\n");
-                        }
-
-                        //use the index of the smallest list to determine the move
-                       
-                       // console.log("choosing " + this.result);
-                        this.target = [t[this.result].x, t[this.result].y];
-                        this.result = 0;
-                    } else {
-                        this.Write("BOMB\n");
-                    }
-                } else {
-                   //console.log("SAFE");
-                   // console.log("number of bombs : " + this.bombs.length);
-                    this.fear = false;
-                }
+                //console.log("SAFE");
+                // console.log("number of bombs : " + this.bombs.length);
+                this.fear = false;
             }
         }
 
@@ -263,6 +218,7 @@ gamestate.prototype.Update = function(data)
         var i = Math.floor(Math.random()*deadlist.length);
         this.Write("SAY " + deadlist[i] + "\n");
         this.fear = false;
+        this.armageddon = false;
     }
 }
 
