@@ -58,8 +58,16 @@ navigator.prototype.NextTile = function(num)
     var m = this.map[p.x][p.y];
     switch(m)
     {
-        case 2:
+        case 9:
             return "ROCK";
+        case 5:
+            return "GRASS";
+        case 4:
+            return "GRASS";
+        case 3:
+            return "GRASS";
+        case 2:
+            return "GRASS";
         case 1:
             return "GRASS";
         case 0:

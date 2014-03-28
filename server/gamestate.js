@@ -5,10 +5,11 @@ var randomcount = 20
 var r = 0 
 function gamestate(socket)
 {
-    
+    this.nodeExit = []
     this.socket = socket;
     this.name = "Determined Gir"
     this.map;
+    this.weightedmap;
     this.bombs = [];
     this.players = [];
     this.me = {x: 0, x: 0};
@@ -33,6 +34,10 @@ gamestate.prototype.Update = function(data)
         this.me.x = data.x;
         this.me.y = data.y;
 
+
+        
+        this.nodeExit = this.nodeWeights(); // !!!    !!!!   !!!!    !!!!    nodeexit[y][x] OBS!
+    
        
         randomcount++
         if (randomcount > 20) {
@@ -42,21 +47,31 @@ gamestate.prototype.Update = function(data)
 
         if (r > data.players.length-1) { r = data.players.length-1 }
         this.target = [this.players[0].x, this.players[0].y];
-        console.log("target player " + r);
-
+        
 
         for (var i = 0; i < this.players.length; i++)
         {
-            this.map[this.players[i].y][this.players[i].x] = 2;
+            this.map[this.players[i].y][this.players[i].x] = 9; //should be made dynamic
         }
+
+         //need some fancy function to merge the map data here.
+        this.weightedmap = this.mergemaps(this.nodeExit, this.map, 9, 0) //made one!
+        console.log(this.weightedmap)
+        
+        //HOOOLY FUCK, this is it.. let's see!
+        this.map = this.weightedmap
 
 
         if (this.bombs.length > 0)
         {
             this.WeightBombs();
+            var yo_mama = false
+            if ( yo_mama == true)//this.bombs.length > this.players.length + 1)
+            {   
 
-            if (this.bombs.length > this.players.length + 1)
-            {
+                //christ man, make a function :D this shit is unreadable :D
+                //also! rock and players are now weighted as 9, and not 2. nice to know :D
+                
                 this.armageddon = true;
                 console.log("ARMAGEDDON!!!");
                 this.target = [this.me.x, this.me.y];
@@ -106,7 +121,7 @@ gamestate.prototype.Update = function(data)
             } else {
                 if (this.SafeFromBombs(this.me.x, this.me.y) == false && this.armageddon == false)
                 {
-                    console.log("UNSAFE");
+                    //console.log("UNSAFE");
                     this.fear = true;
                     this.map = parser.ParseMap(data.map, this.fear);
 
@@ -115,9 +130,9 @@ gamestate.prototype.Update = function(data)
                     //find all safe spots within theoretical walking distance before bomb goes off
                     var t = this.SquareSearch(this.me, 10);
 
-                    console.log("safe spots -------------");
-                    console.log("found " + t.length);
-                    console.log("------------------------");
+                   // console.log("safe spots -------------");
+                   // console.log("found " + t.length);
+                   // console.log("------------------------");
 
                     var arrays = [];
                     var tgraph = new Graph(this.map);
@@ -163,38 +178,35 @@ gamestate.prototype.Update = function(data)
                         try {
                             this.result = samelength[0].i;
                         } catch (err) {
-                            this.Write("TACOOOS!!!111!11one\n");
+                            this.Write("SAY TACOOOS!!!111!11one\n");
                         }
 
                         //use the index of the smallest list to determine the move
                        
-                        console.log("choosing " + this.result);
+                       // console.log("choosing " + this.result);
                         this.target = [t[this.result].x, t[this.result].y];
                         this.result = 0;
                     } else {
                         this.Write("BOMB\n");
                     }
                 } else {
-                    console.log("SAFE");
-                    console.log(this.me);
-                    console.log(this.bombs);
-                    console.log(data.bombs);
+                   //console.log("SAFE");
+                   // console.log("number of bombs : " + this.bombs.length);
                     this.fear = false;
                 }
             }
         }
 
-        var nw = [];
-        nw = this.nodeWeights();
-        //console.log("nodeweights------------------")
-        //console.log(nw)
+        
 
         // Define a new a* graph
         var graph = new Graph(this.map);
         var start = graph.nodes[this.me.y][this.me.x];
+        
         console.log("setting target -------------")
         console.log(this.target)
         console.log("----------------------------")
+        
         var end  = graph.nodes[this.target[1]][this.target[0]];
         var result = astar.search(graph.nodes, start, end);
 
@@ -205,7 +217,8 @@ gamestate.prototype.Update = function(data)
         {
             var dontmove = false;
 
-            if (this.SafeFromBombs(this.me.x, this.me.y) == true) {
+        // this actually doesn't do anything anymore. 
+         /*   if (this.SafeFromBombs(this.me.x, this.me.y) == true) {
                
                 if (n.move(0) == "UP\n") {
                     if (this.SafeFromBombs(this.me.x, this.me.y - 1) == false) {
@@ -228,7 +241,7 @@ gamestate.prototype.Update = function(data)
                     }
                 }
             }
-
+        */
             if (dontmove == false) {
                 this.Write(n.move(0));}
             else {
@@ -242,6 +255,8 @@ gamestate.prototype.Update = function(data)
 
     } else if (data.type == "end round") {
         this.armageddon = false;
+        this.fear = false;
+
     } else if (data.type == "dead") {
         console.log ("this bot is apparently dead");
         var deadlist = ["but.. whyy?\n", "MORRADI ER FEIT!!\n", "Next time, mr bond!\n", "dafuq?\n", "Your mom!\n", "My plan has failed!\n"];
@@ -254,7 +269,7 @@ gamestate.prototype.Update = function(data)
 gamestate.prototype.SquareSearch = function(origo, r)
 {
     var distArr = [];
-    console.log("In SquareSearch new")
+    //console.log("In SquareSearch new")
 
     // Prevent search from going outside map
     var start = {x: origo.x - r, y: origo.y - r};
@@ -288,25 +303,56 @@ gamestate.prototype.nodeWeights = function(lol)
 {
     var array = []
     var numnodes 
-    for (var x = 0; x < this.map[0].length; x++) {
-        for (var y = 0; y < this.map.length; y++){
-
+    for (var y = 0; y < this.map.length; y++) {
+        var t = []
+        
+        for (var x = 0; x < this.map[0].length; x++){
+            
             if (this.map[y][x] == 1){
-                
                 numnodes = this.playerMoveSearch({x: x, y: y});
-                
-                array.push ({x: x, y: y, n: numnodes.length})
+                t.push (numnodes.length)
             } 
             else {
                //console.log("not a 1")
-                array.push({x: x, y: y, n: 0})
+                t.push(0)
             }
-
-
         }
+    array.push(t)
+
     }
     return array;
 }
+
+
+
+gamestate.prototype.mergemaps = function(array1, array2, val1, val2)
+{
+    var mergedarray = []
+    var merge1
+    var merge2
+    
+    for (var y = 0; y < array2.length; y++) {
+        var t = []
+    
+        for (var x = 0; x < array2[0].length; x++){
+            merge1 = array2[y][x]
+            merge2 = 4 - array1[y][x]
+            
+            if (merge1 == val1) {merge2 = 0}
+            if (merge1 == val2) {merge2 = 0}
+
+            var finalmerge = merge1 + merge2
+            t.push (finalmerge)
+        } 
+        
+        mergedarray.push(t)
+    }
+    
+    return mergedarray
+}
+
+
+
 
 gamestate.prototype.playerMoveSearch = function(origo)
 {
@@ -336,7 +382,7 @@ gamestate.prototype.playerMoveSearch = function(origo)
             distArr.push ({x:x, y:y})
         }
         
-        } catch (err) {console.log ("outside map")}
+        } catch (err) {}
 
     }
 
@@ -345,7 +391,7 @@ gamestate.prototype.playerMoveSearch = function(origo)
     return distArr;
 }
 
-gamestate.prototype.WeightBombs = function()
+gamestate.prototype.WeightBombs = function() //should be weighted by ttl now. hard! like, 10,20,50,90,0
 {
     for (var i = 0; i < this.bombs.length; i++)
     {
@@ -485,7 +531,7 @@ gamestate.prototype.CanGetThere = function(x, y, target, bombs)
 gamestate.prototype.Write = function(input)
 {
     this.socket.write(input);
-    console.log(input);
+    //console.log(input);
 }
 
 /**

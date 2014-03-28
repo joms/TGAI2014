@@ -31,6 +31,11 @@ client.on('error', function(data) {
 
 client.on('data', function(data) {
     var hrstart = process.hrtime();
+    
+    for (var i = 0; i < 20; i++) {
+        console.log("")
+    };
+    
     iter++;
     console.log("--------Iteration : " + iter + "------");
     //console.log(data.toString("utf-8"));
