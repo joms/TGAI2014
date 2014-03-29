@@ -60,6 +60,10 @@ navigator.prototype.NextTile = function(num)
     {
         case 9:
             return "ROCK";
+        case 8:
+            return "GRASS";
+        case 6:
+            return "GRASS";
         case 5:
             return "GRASS";
         case 4:

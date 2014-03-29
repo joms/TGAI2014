@@ -64,58 +64,44 @@ gamestate.prototype.Update = function(data)
          //need some fancy function to merge the map data here.
         this.weightedmap = this.mergemaps(this.nodeExit, this.map, 9, 0) //made one!
         
-        if (this.armageddon == true) {
-                    console.log("me, oldtarget")
-                    console.log(this.me.x + " " + this.oldtarget.x)
-                    console.log(this.me.y + " " + this.oldtarget.y)
-                    
-                    if (this.me == this.safestspot[0]) { 
-                        console.log ("staying put!")
-                        this.target = [this.me.x, this.me.y]
-                    } 
-                    else
+        if (this.armageddon == true && this.players.length < 2) {
+            console.log("me, oldtarget")
+            console.log(this.me.x + " " + this.oldtarget.x)
+            console.log(this.me.y + " " + this.oldtarget.y)
+            
+            if (this.me == this.safestspot[0]) { 
+                console.log ("staying put!")
+                this.target = [this.me.x, this.me.y]
+            } 
+            else
+            {
+                var arrays = [];
+                var tgraph = new Graph(this.map);
+                var start = tgraph.nodes[this.me.y][this.me.x];
+                for (var i = 0; i < this.safestspot.length; i++)
+                {
+                    var end = tgraph.nodes[this.safestspot[i].y][this.safestspot[i].x];
+                    var result = astar.search(tgraph.nodes, start, end);
+
+                    if (result.length > 0)
                     {
-
-
-
-                        var arrays = [];
-                        var tgraph = new Graph(this.map);
-                        var start = tgraph.nodes[this.me.y][this.me.x];
-                        for (var i = 0; i < this.safestspot.length; i++)
-                        {
-                            var end = tgraph.nodes[this.safestspot[i].y][this.safestspot[i].x];
-                            var result = astar.search(tgraph.nodes, start, end);
-
-                            if (result.length > 0)
-                            {
-                                arrays.push({l: result.length, i: i});
-                            }
-                        }
-                        
-                        arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
-                        console.log(arrays)
-                        
-                        try{ 
-                            this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] 
-                            
-                        }
-                        catch (err) 
-                        {this.target = [this.safestspot[0].x, this.safestspot[0].y];
-                        }
-             onetimebool = true          
-            }           
-
-
-        //just for testing
-        
-        //this.target = [this.safestspot[0].x, this.safestspot[0].y];
-        
-        //do an a* on all safespots and determine the closest one
-                if (this.armageddon == true) {
-                    
-                         
+                        arrays.push({l: result.length, i: i});
                     }
                 }
+                
+                arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
+                console.log(arrays)
+                
+                try{ 
+                    this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] 
+                    
+                }
+                catch (err) 
+                {this.target = [this.safestspot[0].x, this.safestspot[0].y];
+                }
+            onetimebool = true          
+            }           
+        }
         //HOOOLY FUCK, this is it.. let's see!
         this.map = this.weightedmap
 
@@ -368,6 +354,7 @@ gamestate.prototype.mergemaps = function(array1, array2, val1, val2)
         for (var x = 0; x < array2[0].length; x++){
             merge1 = array2[y][x]
             merge2 = 4 - array1[y][x]
+            if (merge2>1){merge2 = merge2*2}
             
             if (merge1 == val1) {merge2 = 0}
             if (merge1 == val2) {merge2 = 0}
