@@ -64,7 +64,7 @@ gamestate.prototype.Update = function(data)
         
         //do an a* on all safespots and determine the closest one
                 if (this.armageddon == true) {
-                    if (this.me == this.target) {} else {
+                    if (this.me == this.oldtarget) {} else {
 
 
 
@@ -86,9 +86,10 @@ gamestate.prototype.Update = function(data)
                     console.log(arrays)
                     
                     try{ 
-                        this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] }
-                    
-                    catch (err) {this.target = [this.safestspot[0].x, this.safestspot[0].y];}
+                        this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] 
+                        this.oldtarget = this.target }
+                    catch (err) {this.target = [this.safestspot[0].x, this.safestspot[0].y];
+                                this.oldtarget = this.me}
                     }
                 }
         //HOOOLY FUCK, this is it.. let's see!
@@ -99,7 +100,7 @@ gamestate.prototype.Update = function(data)
         {
             this.WeightBombs();
             var yo_mama = true;
-            if ((yo_mama == true && this.bombs.length > this.players.length + 1) || this.armageddon == true)
+            if ((yo_mama == true && this.bombs.length > this.players.length + 1) && this.armageddon == false)
             {
                 this.armageddon = true;
                 console.log("ARMAGEDDON!!!");
