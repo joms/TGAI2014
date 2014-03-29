@@ -19,7 +19,7 @@ function gamestate(socket)
     this.armageddon = false;
     this.insults = ["Piggy!\n", "Waffles?\n", "AND I'M... AAAH-ahah... I dunno.\n", "I love this show!\n", "Tell me a story about giant pigs!\n", "I'm gonna sing the Doom Song now.\n", "Awww... I wanted to explode.\n",
         "Somebody needs a hug!\n", "..MONKEY!\n", "I made mashed po-ta-toes!\n", "Cazzo duro!\n",  "I miss my cupcake.\n", "Your head smells like a puppy!\n", "The pig... COMMANDS ME!\n", "Hi floor! Make me a sandwich!\n", "Aww, it likes me.\n", "TACOOOS!!!\n"];
-
+    this.safestspot = []
 }
 
 /**
@@ -56,7 +56,8 @@ gamestate.prototype.Update = function(data)
 
          //need some fancy function to merge the map data here.
         this.weightedmap = this.mergemaps(this.nodeExit, this.map, 9, 0) //made one!
-        console.log(this.weightedmap)
+        
+       
         
         //HOOOLY FUCK, this is it.. let's see!
         this.map = this.weightedmap
@@ -283,11 +284,15 @@ gamestate.prototype.nodeWeights = function(lol)
 
 gamestate.prototype.mergemaps = function(array1, array2, val1, val2)
 {
+    var safest = []
     var mergedarray = []
     var merge1
     var merge2
-    
-    for (var y = 0; y < array2.length; y++) {
+    var lastmerge
+    var sorted = []
+    var finalmerge
+   
+   for (var y = 0; y < array2.length; y++) {
         var t = []
     
         for (var x = 0; x < array2[0].length; x++){
@@ -297,12 +302,35 @@ gamestate.prototype.mergemaps = function(array1, array2, val1, val2)
             if (merge1 == val1) {merge2 = 0}
             if (merge1 == val2) {merge2 = 0}
 
-            var finalmerge = merge1 + merge2
+            finalmerge = merge1 + merge2
+            
+            
+                if (finalmerge == 0 || finalmerge > 8) {
+
+                }else{
+                    sorted.push({x: x, y: y, v: finalmerge})
+                }
+            
+            lastmerge = finalmerge
             t.push (finalmerge)
         } 
         
         mergedarray.push(t)
     }
+    
+    sorted.sort(function(a,b){ if (a.v < b.v) return -1; if (a.v > b.v) return 1; return 0; })
+    
+    
+    
+    for (var i = 0; i < sorted.length; i++) {
+        if (sorted[i].v == sorted[0].v) {
+            safest.push({x: sorted[i].x, y: sorted[i].y});
+        }
+    }
+   
+    console.log(safest)
+    this.safestspot = safest
+    
     
     return mergedarray
 }
