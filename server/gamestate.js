@@ -3,6 +3,8 @@ require('./astar.js');
 var Navigator = require('./navigation.js');
 var randomcount = 20 
 var r = 0 
+var onetimebool = false 
+
 function gamestate(socket)
 {
     this.nodeExit = []
@@ -12,7 +14,7 @@ function gamestate(socket)
     this.weightedmap;
     this.bombs = [];
     this.players = [];
-    this.me = {x: 0, x: 0};
+    this.me = {x: 0, y: 0};
     this.target = [];
     this.fear = false;
     this.result = 0;
@@ -20,6 +22,7 @@ function gamestate(socket)
     this.insults = ["Piggy!\n", "Waffles?\n", "AND I'M... AAAH-ahah... I dunno.\n", "I love this show!\n", "Tell me a story about giant pigs!\n", "I'm gonna sing the Doom Song now.\n", "Awww... I wanted to explode.\n",
         "Somebody needs a hug!\n", "..MONKEY!\n", "I made mashed po-ta-toes!\n", "Cazzo duro!\n",  "I miss my cupcake.\n", "Your head smells like a puppy!\n", "The pig... COMMANDS ME!\n", "Hi floor! Make me a sandwich!\n", "Aww, it likes me.\n", "TACOOOS!!!\n"];
     this.safestspot = []
+    this.oldtarget = {x:0,y:0}
 }
 
 /**
@@ -40,13 +43,17 @@ gamestate.prototype.Update = function(data)
     
        
         randomcount++
+        
         if (randomcount > 20) {
             r = Math.floor(Math.random()*data.players.length);
             randomcount = 0;
         }
 
-        if (r > data.players.length-1) { r = data.players.length-1 }
-        this.target = [this.players[r].x, this.players[r].y];
+        if (this.armageddon == false){
+        //if (r > data.players.length-1) { r = data.players.length-1 }
+        }
+        
+        try {this.target = [this.players[r].x, this.players[r].y];} catch (err) {this.target = [this.me.x,this.me.y];}
     
 
         for (var i = 0; i < this.players.length; i++)
@@ -56,7 +63,48 @@ gamestate.prototype.Update = function(data)
 
          //need some fancy function to merge the map data here.
         this.weightedmap = this.mergemaps(this.nodeExit, this.map, 9, 0) //made one!
-         
+        
+        if (this.armageddon == true) {
+                    console.log("me, oldtarget")
+                    console.log(this.me.x + " " + this.oldtarget.x)
+                    console.log(this.me.y + " " + this.oldtarget.y)
+                    
+                    if (this.me == this.safestspot[0]) { 
+                        console.log ("staying put!")
+                        this.target = [this.me.x, this.me.y]
+                    } 
+                    else
+                    {
+
+
+
+                        var arrays = [];
+                        var tgraph = new Graph(this.map);
+                        var start = tgraph.nodes[this.me.y][this.me.x];
+                        for (var i = 0; i < this.safestspot.length; i++)
+                        {
+                            var end = tgraph.nodes[this.safestspot[i].y][this.safestspot[i].x];
+                            var result = astar.search(tgraph.nodes, start, end);
+
+                            if (result.length > 0)
+                            {
+                                arrays.push({l: result.length, i: i});
+                            }
+                        }
+                        
+                        arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
+                        console.log(arrays)
+                        
+                        try{ 
+                            this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] 
+                            
+                        }
+                        catch (err) 
+                        {this.target = [this.safestspot[0].x, this.safestspot[0].y];
+                        }
+             onetimebool = true          
+            }           
+
 
         //just for testing
         
@@ -64,32 +112,8 @@ gamestate.prototype.Update = function(data)
         
         //do an a* on all safespots and determine the closest one
                 if (this.armageddon == true) {
-                    if (this.me == this.oldtarget) {} else {
-
-
-
-                    var arrays = [];
-                    var tgraph = new Graph(this.map);
-                    var start = tgraph.nodes[this.me.y][this.me.x];
-                    for (var i = 0; i < this.safestspot.length; i++)
-                    {
-                        var end = tgraph.nodes[this.safestspot[i].y][this.safestspot[i].x];
-                        var result = astar.search(tgraph.nodes, start, end);
-
-                        if (result.length > 0)
-                        {
-                            arrays.push({l: result.length, i: i});
-                        }
-                    }
                     
-                    arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
-                    console.log(arrays)
-                    
-                    try{ 
-                        this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] 
-                        this.oldtarget = this.target }
-                    catch (err) {this.target = [this.safestspot[0].x, this.safestspot[0].y];
-                                this.oldtarget = this.me}
+                         
                     }
                 }
         //HOOOLY FUCK, this is it.. let's see!
@@ -100,14 +124,19 @@ gamestate.prototype.Update = function(data)
         {
             this.WeightBombs();
             var yo_mama = true;
-            if ((yo_mama == true && this.bombs.length > this.players.length + 1) && this.armageddon == false)
+            if (this.bombs.length > this.players.length + 1)
             {
                 this.armageddon = true;
+                onetimebool = false;
                 console.log("ARMAGEDDON!!!");
-                this.target = [this.safestspot[0].x, this.safestspot[0].y];
+                                
+
+                //this.target = [this.safestspot[0].x, this.safestspot[0].y];
 
                 this.WeightPlayers(1);
             }
+
+            
 
             if (this.SafeFromBombs(this.me.x, this.me.y) == false)
             {
@@ -171,7 +200,7 @@ gamestate.prototype.Update = function(data)
                     try {
                         this.result = samelength[0].i;
                     } catch (err) {
-                        this.Write("SAY TACOOOS!!!111!11one\n");
+                        this.Write("SAY TACOOOS!!!1\n");
                     }
 
                     //use the index of the smallest list to determine the move
@@ -185,11 +214,13 @@ gamestate.prototype.Update = function(data)
             } else {
                 //console.log("SAFE");
                 // console.log("number of bombs : " + this.bombs.length);
+                 this.map = this.weightedmap
+
                 this.fear = false;
             }
         }
-
         
+        console.log(this.map)        
 
         // Define a new a* graph
         var graph = new Graph(this.map);
@@ -243,6 +274,9 @@ gamestate.prototype.Update = function(data)
             {
                 this.Write("BOMB\n");
             }
+            this.oldtarget.x = this.target[0]
+            this.oldtarget.y = this.target[1]
+
         }
 
     } else if (data.type == "end round") {
@@ -418,22 +452,23 @@ gamestate.prototype.WeightBombs = function() //should be weighted by ttl now. ha
         var b = this.bombs[i];
         this.map[b.y][b.x] = 0;
 
-        var start = {x: b.x - 2, y: b.y - 2};
-        var stop = {x: b.x + 2, y: b.y + 2};
-        if (start.x < 0) {start.x = 0;}
-        if (start.y < 0) {start.y = 0;}
-        if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
-        if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
+        
+            var start = {x: b.x - 2, y: b.y - 2};
+            var stop = {x: b.x + 2, y: b.y + 2};
+            if (start.x < 0) {start.x = 0;}
+            if (start.y < 0) {start.y = 0;}
+            if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
+            if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
 
-        for (var x = start.x; x <= stop.x; x++)
-        {
-            this.map[b.y][x] = 0;
-        }
-        for (var y = start.y ; y <= stop.y; y++)
-        {
-            this.map[y][b.x] = 0;
-        }
-
+            for (var x = start.x; x <= stop.x; x++)
+            {
+                this.map[b.y][x] = 0;
+            }
+            for (var y = start.y ; y <= stop.y; y++)
+            {
+                this.map[y][b.x] = 0;
+            }
+        
     }
 }
 
