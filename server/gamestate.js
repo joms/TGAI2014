@@ -47,7 +47,7 @@ gamestate.prototype.Update = function(data)
 
         if (r > data.players.length-1) { r = data.players.length-1 }
         this.target = [this.players[r].x, this.players[r].y];
-        
+    
 
         for (var i = 0; i < this.players.length; i++)
         {
@@ -56,9 +56,41 @@ gamestate.prototype.Update = function(data)
 
          //need some fancy function to merge the map data here.
         this.weightedmap = this.mergemaps(this.nodeExit, this.map, 9, 0) //made one!
+         
+
+        //just for testing
         
-       
+        //this.target = [this.safestspot[0].x, this.safestspot[0].y];
         
+        //do an a* on all safespots and determine the closest one
+                if (this.armageddon == true) {
+                    if (this.me == this.target) {} else {
+
+
+
+                    var arrays = [];
+                    var tgraph = new Graph(this.map);
+                    var start = tgraph.nodes[this.me.y][this.me.x];
+                    for (var i = 0; i < this.safestspot.length; i++)
+                    {
+                        var end = tgraph.nodes[this.safestspot[i].y][this.safestspot[i].x];
+                        var result = astar.search(tgraph.nodes, start, end);
+
+                        if (result.length > 0)
+                        {
+                            arrays.push({l: result.length, i: i});
+                        }
+                    }
+                    
+                    arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
+                    console.log(arrays)
+                    
+                    try{ 
+                        this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] }
+                    
+                    catch (err) {this.target = [this.safestspot[0].x, this.safestspot[0].y];}
+                    }
+                }
         //HOOOLY FUCK, this is it.. let's see!
         this.map = this.weightedmap
 
@@ -67,11 +99,11 @@ gamestate.prototype.Update = function(data)
         {
             this.WeightBombs();
             var yo_mama = true;
-            if ((yo_mama == true && this.bombs.length > this.players.length + 1) | this.armageddon == true)
+            if ((yo_mama == true && this.bombs.length > this.players.length + 1) || this.armageddon == true)
             {
                 this.armageddon = true;
                 console.log("ARMAGEDDON!!!");
-                this.target = [this.me.x, this.me.y];
+                this.target = [this.safestspot[0].x, this.safestspot[0].y];
 
                 this.WeightPlayers(1);
             }
@@ -110,6 +142,9 @@ gamestate.prototype.Update = function(data)
                         }
                     }
 
+                    //find the safest ones.
+
+
                     //sort the array, lowest l first
                     arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
 
@@ -140,7 +175,7 @@ gamestate.prototype.Update = function(data)
 
                     //use the index of the smallest list to determine the move
 
-                    // console.log("choosing " + this.result);
+                    
                     this.target = [t[this.result].x, t[this.result].y];
                     this.result = 0;
                 } else {
@@ -244,7 +279,7 @@ gamestate.prototype.SquareSearch = function(origo, r)
             // Is this a safe spot?
             if (this.SafeFromBombs(x, y) == true)
             {
-                if (this.map[y][x] == 1)
+                if (this.map[y][x] >= 1 && this.map[y][x] <= 8)
                 {
 
                     distArr.push ({x:x, y:y})
@@ -360,7 +395,7 @@ gamestate.prototype.playerMoveSearch = function(origo)
     //{
         
         try{ 
-            if (this.map[y][x] == 1)
+            if (this.map[y][x] >= 1 && this.map[y][x] <= 3)
         {
           //  console.log ("got an exit")
             distArr.push ({x:x, y:y})
