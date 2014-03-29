@@ -27,7 +27,7 @@ exports.ParseMap = function (data, fear)
  */
 function Weight(point, f)
 {
-    var weight = { wall: 0, walkable: 1, rock: 9};
+    var weight = { wall: 0, walkable: 1, rock: 100};
 
     if (point == "+") {
         return weight.wall;

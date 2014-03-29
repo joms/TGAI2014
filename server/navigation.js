@@ -56,28 +56,16 @@ navigator.prototype.NextTile = function(num)
 {
     var p = this.path[num];
     var m = this.map[p.x][p.y];
-    switch(m)
-    {
-        case 9:
-            return "ROCK";
-        case 8:
-            return "GRASS";
-        case 6:
-            return "GRASS";
-        case 5:
-            return "GRASS";
-        case 4:
-            return "GRASS";
-        case 3:
-            return "GRASS";
-        case 2:
-            return "GRASS";
-        case 1:
-            return "GRASS";
-        case 0:
-            return "WALL";
-        default:
-            return "UNKOWN";
+
+
+    if (m>0 && m<100){
+        return "GRASS"
+    }
+    if (m == 100) {
+        return "ROCK"
+    };
+    if (m == 0) {
+        return "WALL"
     }
 }
 

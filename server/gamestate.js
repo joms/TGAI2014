@@ -38,7 +38,7 @@ gamestate.prototype.Update = function(data)
         this.me.y = data.y;
 
 
-        
+        //weigh the nodes
         this.nodeExit = this.nodeWeights(); // !!!    !!!!   !!!!    !!!!    nodeexit[y][x] OBS!
     
        
@@ -58,11 +58,11 @@ gamestate.prototype.Update = function(data)
 
         for (var i = 0; i < this.players.length; i++)
         {
-            this.map[this.players[i].y][this.players[i].x] = 9; //should be made dynamic
+            this.map[this.players[i].y][this.players[i].x] = 100; //should be made dynamic
         }
 
          //need some fancy function to merge the map data here.
-        this.weightedmap = this.mergemaps(this.nodeExit, this.map, 9, 0) //made one!
+        this.weightedmap = this.mergemaps(this.nodeExit, this.map, 100, 0) //made one!
         
         if (this.armageddon == true && this.players.length < 2) {
             console.log("me, oldtarget")
@@ -333,10 +333,56 @@ gamestate.prototype.nodeWeights = function(lol)
     array.push(t)
 
     }
-    return array;
+
+    var array2 = []
+    var weighnodes 
+    for (var y = 0; y < this.map.length; y++) {
+        var t = []
+        
+        for (var x = 0; x < this.map[0].length; x++){
+            
+            if (this.map[y][x] == 0){t.push(0)
+            }
+            else{
+                weighnodes = this.modifyweight(x,y,array);
+                t.push (weighnodes)
+            } 
+            
+        }
+    
+    array2.push(t)
+    }
+    
+    return array2;
 }
 
+gamestate.prototype.modifyweight = function(x,y,array)
+{
+    var mod = 0
+    var list = {x: [], y: []};
+    list.x = [0,-1,1,0]
+    list.y = [-1,0,0,1]
 
+    for (var i = 0; i < list.x.length; i++)
+    {
+        sx = x+list.x[i]
+        sy = y+list.y[i]
+    
+        if (array[sy][sx] > 0 && array[sy][sx] < 5) {
+            if (array[y][x] > array[sy][sx]) {
+                mod = mod - .1
+            } 
+            if (array[y][x] <= array[sy][sx]) {
+                mod = mod + .1
+            } 
+        }    
+    
+    }
+    
+    returnval = Math.round((array[y][x] + mod)*10);
+    if (array[y][x] = 0) {returnval = 0}
+    return returnval; 
+}
 
 gamestate.prototype.mergemaps = function(array1, array2, val1, val2)
 {
@@ -353,7 +399,7 @@ gamestate.prototype.mergemaps = function(array1, array2, val1, val2)
     
         for (var x = 0; x < array2[0].length; x++){
             merge1 = array2[y][x]
-            merge2 = 4 - array1[y][x]
+            merge2 = 50 - array1[y][x]
             if (merge2>1){merge2 = merge2*2}
             
             if (merge1 == val1) {merge2 = 0}
@@ -417,7 +463,7 @@ gamestate.prototype.playerMoveSearch = function(origo)
     //{
         
         try{ 
-            if (this.map[y][x] >= 1 && this.map[y][x] <= 3)
+            if (this.map[y][x] >= 1 && this.map[y][x] <= 99)
         {
           //  console.log ("got an exit")
             distArr.push ({x:x, y:y})
