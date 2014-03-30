@@ -21,7 +21,7 @@ client.on('connect', function()
 {
     console.log('CONNECTED TO: ' + HOST + ':' + PORT);
     client.write('JSON\n');
-    client.write('NAME GIR\n');
+    client.write('NAME GIR3.0\n');
 })
 
 client.on('error', function(data) {

@@ -50,6 +50,7 @@ gamestate.prototype.Update = function(data)
         }
 
         
+
         
         for (var i = 0; i < this.players.length; i++)
         {
@@ -101,8 +102,13 @@ gamestate.prototype.Update = function(data)
                 }
                 
                 arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
-                console.log(arrays)
+
+                console.log (this.nodeExit[this.players[0].y][this.players[0].x])
+                console.log (this.nodeExit[this.me.y][this.me.x])
+
                 
+
+
                 try{ 
                     this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] 
                     
@@ -110,8 +116,14 @@ gamestate.prototype.Update = function(data)
                 catch (err) 
                 {this.target = [this.safestspot[0].x, this.safestspot[0].y];
                 }
+            
             onetimebool = true          
                       
+            if (this.nodeExit[this.players[0].y][this.players[0].x] < this.nodeExit[this.me.y][this.me.x]) {
+                    console.log("player on harder tile: attack!")
+                    this.target = [this.players[0].x,this.players[0].y];
+                }
+
         }
         //HOOOLY FUCK, this is it.. let's see!
         this.map = this.weightedmap
@@ -130,7 +142,7 @@ gamestate.prototype.Update = function(data)
 
                 //this.target = [this.safestspot[0].x, this.safestspot[0].y];
 
-                this.WeightPlayers(1);
+                //this.WeightPlayers(1);
             }
 
             
@@ -175,6 +187,8 @@ gamestate.prototype.Update = function(data)
                     //sort the array, lowest l first
                    
                     arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
+
+
 
                     var samelength = [];
                     var mytarget = [];
@@ -381,7 +395,7 @@ gamestate.prototype.modifyweight = function(x,y,array)
         sx = x+list.x[i]
         sy = y+list.y[i]
     
-        if (array[sy][sx] > 0 && array[sy][sx] < 5) {
+        if (array[sy][sx] < 5) {
             if (array[y][x] > array[sy][sx]) {
                 mod = mod - .1
             } 
