@@ -38,27 +38,29 @@ gamestate.prototype.Update = function(data)
         this.me.y = data.y;
 
 
-        //weigh the nodes
+        //gi nodene vekt basert på hvor mange utganger de har
         this.nodeExit = this.nodeWeights(); // !!!    !!!!   !!!!    !!!!    nodeexit[y][x] OBS!
     
        
+        //velg en tilfeldig spiller som target hvert 20 tick
         randomcount++
-        
         if (randomcount > 20) {
-            r = Math.floor(Math.random()*data.players.length);
+            ran = Math.floor(Math.random()*data.players.length);
             randomcount = 0;
         }
 
-        
-
-        
+        //vei spillere inn i kartet         
         for (var i = 0; i < this.players.length; i++)
         {
             this.map[this.players[i].y][this.players[i].x] = 100; //should be made dynamic
         }
 
-         this.weightedmap = this.mergemaps(this.nodeExit, this.map, 100, 0) //made one!
+        
+        //merge kartet med nodeexits
+        this.weightedmap = this.mergemaps(this.nodeExit, this.map, 100, 0) //made one!
 
+        //velg nærmeste spiller som target
+        
         var arrays = [];
         var tgraph = new Graph(this.map);
         var start = tgraph.nodes[this.me.y][this.me.x];
@@ -73,161 +75,105 @@ gamestate.prototype.Update = function(data)
                 arrays.push({l: result.length, i: i});
             }
         }
-            arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
-            
-            try {this.target = [this.players[arrays[0].i].x, this.players[arrays[0].i].y];} 
-            catch (err) {this.target = [this.players[r].x,this.players[r].y];}    
-            
         
-
-         //need some fancy function to merge the map data here.
-       
+        arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
         
+        try {this.target = [this.players[arrays[0].i].x, this.players[arrays[0].i].y];} 
+        catch (err) {this.target = [this.players[ran].x,this.players[ran].y];}    
+        
+        
+        //om det bare er en motstander igjen på kartet
         if (this.players.length < 2) {
-           
-            
-           
-                var arrays = [];
-                var tgraph = new Graph(this.map);
-                var start = tgraph.nodes[this.me.y][this.me.x];
-                for (var i = 0; i < this.safestspot.length; i++)
-                {
-                    var end = tgraph.nodes[this.safestspot[i].y][this.safestspot[i].x];
-                    var result = astar.search(tgraph.nodes, start, end);
-
-                    if (result.length > 0)
-                    {
-                        arrays.push({l: result.length, i: i});
-                    }
-                }
-                
-                arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
-
-                console.log (this.nodeExit[this.players[0].y][this.players[0].x])
-                console.log (this.nodeExit[this.me.y][this.me.x])
-
-                
-
-
-                try{ 
-                    this.target = [this.safestspot[arrays[0].i].x, this.safestspot[arrays[0].i].y] 
-                    
-                }
-                catch (err) 
-                {this.target = [this.safestspot[0].x, this.safestspot[0].y];
-                }
-            
-            onetimebool = true          
-                      
-            if (this.nodeExit[this.players[0].y][this.players[0].x] < this.nodeExit[this.me.y][this.me.x]) {
-                    console.log("player on harder tile: attack!")
-                    this.target = [this.players[0].x,this.players[0].y];
-                }
-
+            this.target = [this.safestspot[0].x, this.safestspot[0].y];
         }
-        //HOOOLY FUCK, this is it.. let's see!
+        
+
+        //sett det mergede kartet til hovedkart
         this.map = this.weightedmap
 
-
+        //er det bomber på kartet? 
         if (this.bombs.length > 0)
         {
-            this.WeightBombs();
+            this.WeightBombs(0);
             var yo_mama = true;
             if (this.bombs.length > this.players.length + 1)
             {
                 this.armageddon = true;
-                onetimebool = false;
                 console.log("ARMAGEDDON!!!");
-                                
-
-                //this.target = [this.safestspot[0].x, this.safestspot[0].y];
-
-                //this.WeightPlayers(1);
             }
 
-            
-
+            //står jeg på et sikkert sted? 
             if (this.SafeFromBombs(this.me.x, this.me.y) == false)
             {
-                //console.log("UNSAFE");
+                //sett fear til true (dette vil gjøre stein til vegg)
                 this.fear = true;
                 this.map = parser.ParseMap(data.map, this.fear);
-
+                //vei om kartet
+               
+                this.weightedmap = this.mergemaps(this.nodeExit, this.map, 100, 0) //made one!
+                this.map = this.weightedmap
+                //vei inn bomber, og sprengradius. bomber = 0, sprengradius == 999
+                this.WeightBombs(0)
+                //vei inn andre spillere som stein
                 for (var i = 0; i < this.players.length; i++){ var p = this.players[i]; this.map[p.y][p.x] = 0; }
 
                 //find all safe spots within theoretical walking distance before bomb goes off
-                var t = this.SquareSearch(this.me, 6);
+                var t = this.SquareSearch(this.me, 8);
+                console.log(this.map)
+                console.log(t)
 
-                // console.log("safe spots -------------");
-                // console.log("found " + t.length);
-                // console.log("------------------------");
+                //sjekk hvilke av safespotene som ligger nærmest/innenfor hvor man kan gå
+                if (t.length>0) {
+                    var result = []
+                    var safecheck = []
+                    var graph = new Graph(this.map);
+                    var start = graph.nodes[this.me.y][this.me.x];
+                    
+                    for (var i = 0;i<t.length;i++) {
+                        var end  = graph.nodes[t[i].y][t[i].x];
+                        result = astar.search(graph.nodes, start, end);
+                        var r = result.length 
+                        if (r>0) {
+                            safecheck.push({i: i, r: r, s: this.map[t[i].y][t[i].x]})
+                        }
+                    }
+                    
+                
+                    safecheck.sort(function(a,b){ if (a.r< b.r) return -1; if (a.r > b.r) return 1; return 0; })
+                    
+                    console.log("safecheck")
+                    console.log(safecheck)
 
-                var arrays = [];
-                var tgraph = new Graph(this.map);
-                var start = tgraph.nodes[this.me.y][this.me.x];
-
-                //check if there is any safespots present
-                if (t.length>0)
-                {
-                    //do an a* on all safespots and determine the closest one
-                    for (var i = 0; i < t.length; i++)
-                    {
-                        var end = tgraph.nodes[t[i].y][t[i].x];
-                        var result = astar.search(tgraph.nodes, start, end);
-
-                        if (result.length > 0)
-                        {
-                            arrays.push({l: result.length, i: i});
+                    //om to har samme lengde, velg den sikreste
+                    var samelength = []
+                    for (var i=0; i < safecheck.length; i++) {
+                        if (safecheck[i].r <= 5){
+                            samelength.push(safecheck[i])
                         }
                     }
 
-                    //find the safest ones.
+                    samelength.sort(function(a,b){ if (a.s< b.s) return -1; if (a.s > b.s) return 1; return 0; })
+                    console.log("samelength")
+                    console.log(samelength)
 
-
-                    //sort the array, lowest l first
-                   
-                    arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
-
-
-
-                    var samelength = [];
-                    var mytarget = [];
-                    var decisionindex = 0;
-
-                    //figure out if any of the indexes have the same length and then do a squaresearch and save them in samelength
-                    for (var i = 0; i<arrays.length; i++)
-                    {
-                        if (arrays[i].l == arrays[0].l)
-                        {
-                            mytarget[decisionindex] = this.playerMoveSearch(t[arrays[i].i]);
-                            samelength.push({l:mytarget[decisionindex].length, i:arrays[i].i});
-                            decisionindex++;
-                        }
+                    if (samelength.length > 0){
+                    index = samelength[0].i
+                    this.target = [t[index].x, t[index].y];
                     }
-
-                    //sort the list, highest l first
-                    samelength.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; });
-                    samelength.reverse();
-
-                    try {
-                        this.result = samelength[0].i;
-                    } catch (err) {
-                        this.Write("SAY TACOOOS!!!1\n");
-                    }
-
-                    //use the index of the smallest list to determine the move
-
-                    t.sort(function(a,b){ if (a.s < b.s) return -1; if (a.s > b.s) return 1; return 0; })
-                    this.target = [t[this.result].x, t[this.result].y];
-                    this.result = 0;
-                } else {
-                    this.Write("BOMB\n");
+                    else
+                        {console.log("no way out")
+                        this.target = [this.me.x, this.me.y]}
                 }
-            } else {
-                //console.log("SAFE");
-                // console.log("number of bombs : " + this.bombs.length);
-                 this.map = this.weightedmap
+                    
 
+                //console.log("locked")
+                //while (this.fear == true) {}
+
+                
+            } else {
+
+                this.map = this.weightedmap
+                this.WeightBombs(1)
                 this.fear = false;
             }
         }
@@ -253,7 +199,7 @@ gamestate.prototype.Update = function(data)
             var dontmove = false;
 
         // this actually doesn't do anything anymore. 
-         /*   if (this.SafeFromBombs(this.me.x, this.me.y) == true) {
+            if (this.SafeFromBombs(this.me.x, this.me.y) == true) {
                
                 if (n.move(0) == "UP\n") {
                     if (this.SafeFromBombs(this.me.x, this.me.y - 1) == false) {
@@ -276,7 +222,7 @@ gamestate.prototype.Update = function(data)
                     }
                 }
             }
-        */
+        
             if (dontmove == false) {
                 this.Write(n.move(0));}
             else {
@@ -289,6 +235,7 @@ gamestate.prototype.Update = function(data)
             this.oldtarget.x = this.target[0]
             this.oldtarget.y = this.target[1]
 
+            console.log(this.map)
         }
 
     } else if (data.type == "end round") {
@@ -429,6 +376,7 @@ gamestate.prototype.mergemaps = function(array1, array2, val1, val2)
             merge2 = 50 - array1[y][x]
             if (merge2>1){merge2 = merge2*2}
             
+            if (merge1>500) {merge2 = 0}
             if (merge1 == val1) {merge2 = 0}
             if (merge1 == val2) {merge2 = 0}
 
@@ -491,7 +439,7 @@ gamestate.prototype.playerMoveSearch = function(origo)
     //{
         
         try{ 
-            if (this.map[y][x] >= 1 && this.map[y][x] <= 99)
+            if (this.map[y][x] >= 1 && this.map[y][x] <= 50)
         {
           //  console.log ("got an exit")
             distArr.push ({x:x, y:y})
@@ -506,12 +454,12 @@ gamestate.prototype.playerMoveSearch = function(origo)
     return distArr;
 }
 
-gamestate.prototype.WeightBombs = function() //should be weighted by ttl now. hard! like, 10,20,50,90,0
+gamestate.prototype.WeightBombs = function(f) //should be weighted by ttl now. hard! like, 10,20,50,90,0
 {
     for (var i = 0; i < this.bombs.length; i++)
     {
         var b = this.bombs[i];
-        this.map[b.y][b.x] = 0;
+        
 
         
             var start = {x: b.x - 2, y: b.y - 2};
@@ -521,16 +469,39 @@ gamestate.prototype.WeightBombs = function() //should be weighted by ttl now. ha
             if (stop.x > this.map[0].length - 1) {stop.x = this.map[0].length - 1;}
             if (stop.y > this.map.length - 1) {stop.y = this.map.length - 1;}
 
-            for (var x = start.x; x <= stop.x; x++)
-            {
-                this.map[b.y][x] = 0;
+            if (f == 0) { 
+                for (var x = start.x; x <= stop.x; x++)
+                {
+                    if (this.map[b.y][x] != 0) { 
+                        this.map[b.y][x] = 999;
+                    }        
+                }
+                for (var y = start.y ; y <= stop.y; y++)
+                {
+                    if (this.map[y][b.x] != 0) {     
+                        this.map[y][b.x] = 999;
+                    }
+                }
             }
-            for (var y = start.y ; y <= stop.y; y++)
-            {
-                this.map[y][b.x] = 0;
-            }
-        
+            else {
+                for (var x = start.x; x <= stop.x; x++)
+                {
+                    if (this.map[b.y][x] != 0) { 
+                        this.map[b.y][x] = 0;
+                    }        
+                }
+                for (var y = start.y ; y <= stop.y; y++)
+                {
+                    if (this.map[y][b.x] != 0) {     
+                        this.map[y][b.x] = 0;
+                    }
+                }
+
+
+            }        
+    this.map[b.y][b.x] = 0;
     }
+    
 }
 
 gamestate.prototype.WeightPlayers = function(r)

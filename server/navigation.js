@@ -56,7 +56,9 @@ navigator.prototype.NextTile = function(num)
 {
     var p = this.path[num];
     var m = this.map[p.x][p.y];
-
+    if (m==999){
+        return "GRASS"
+    }
 
     if (m>0 && m<100){
         return "GRASS"
