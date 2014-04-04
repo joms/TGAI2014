@@ -79,7 +79,7 @@ gamestate.prototype.Update = function(data)
         arrays.sort(function(a,b){ if (a.l < b.l) return -1; if (a.l > b.l) return 1; return 0; })
         
         try {this.target = [this.players[arrays[0].i].x, this.players[arrays[0].i].y];} 
-        catch (err) {this.target = [this.players[ran].x,this.players[ran].y];}    
+        catch (err) {this.target = [this.me.x,this.me.y];}    
         
         
         //om det bare er en motstander igjen på kartet
